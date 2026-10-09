@@ -35,19 +35,7 @@ const MAX_DOB = (() => {
 
 const sanitizePhoneDigits = (val) => String(val || '').replace(/\D/g, '').slice(0, 10)
 
-const seedUsers = [
-  { id: 'u1', name: 'Amit Kumar', email: 'admin@genius.com', role: 'admin', phone: '+91 9810000001', pan: 'ADMIK1234A', status: 'active', createdAt: '2024-06-01', reportsTo: null, armId: null, rmId: null, advisorId: null },
-  { id: 'u2', name: 'Priya Sharma', email: 'arm@genius.com', role: 'arm', phone: '+91 9810000002', pan: 'ARMPS1234B', status: 'active', createdAt: '2024-07-15', reportsTo: 'u1', armId: null, rmId: null, advisorId: null },
-  { id: 'u3', name: 'Rahul Verma', email: 'rm@genius.com', role: 'rm', phone: '+91 9810000003', pan: 'RMRV1234C', status: 'active', createdAt: '2024-08-10', reportsTo: 'u2', armId: 'u2', rmId: null, advisorId: null },
-  { id: 'u4', name: 'Ankit Gupta', email: 'ankit.rm@genius.com', role: 'rm', phone: '+91 9810000004', pan: 'RMAG1234D', status: 'active', createdAt: '2024-09-02', reportsTo: 'u2', armId: 'u2', rmId: null, advisorId: null },
-  { id: 'u5', name: 'Neha Gupta', email: 'advisor@genius.com', role: 'advisor', phone: '+91 9810000005', pan: 'ADNG1234E', status: 'active', createdAt: '2024-09-20', reportsTo: 'u3', armId: 'u2', rmId: 'u3', advisorId: null },
-  { id: 'u6', name: 'Piyush Shah', email: 'piyush.advisor@genius.com', role: 'advisor', phone: '+91 9810000006', pan: 'ADPS1234F', status: 'active', createdAt: '2024-10-05', reportsTo: 'u3', armId: 'u2', rmId: 'u3', advisorId: null },
-  { id: 'u7', name: 'Ritu Jain', email: 'employee@genius.com', role: 'employee', phone: '+91 9810000007', pan: 'EMRJ1234G', status: 'active', createdAt: '2024-10-18', reportsTo: 'u3', armId: 'u2', rmId: 'u3', advisorId: null },
-  { id: 'u8', name: 'Meera Reddy', email: 'client@genius.com', role: 'client', phone: '+91 9810000008', pan: 'CLMR1234H', dob: '1990-05-15', status: 'active', createdAt: '2025-01-05', reportsTo: 'u5', armId: 'u2', rmId: 'u3', advisorId: 'u5' },
-  { id: 'u9', name: 'Rajesh Khanna', email: 'rajesh@example.com', role: 'client', phone: '+91 9810000009', pan: 'CLRK1234I', dob: '1985-11-22', status: 'active', createdAt: '2025-01-20', reportsTo: 'u5', armId: 'u2', rmId: 'u3', advisorId: 'u5' },
-  { id: 'u10', name: 'Sunita Kapoor', email: 'sunita@example.com', role: 'client', phone: '+91 9810000010', pan: 'CLSK1234J', dob: '1988-03-08', status: 'active', createdAt: '2025-02-10', reportsTo: 'u6', armId: 'u2', rmId: 'u3', advisorId: 'u6' },
-  { id: 'u11', name: 'Deepa Nair', email: 'deepa.arm@genius.com', role: 'arm', phone: '+91 9810000011', pan: 'ARDN1234K', status: 'suspended', createdAt: '2024-08-01', reportsTo: 'u1', armId: null, rmId: null, advisorId: null }
-]
+const seedUsers = []
 
 function findUser(users, id) { return users.find(u => u.id === id) }
 function relSummary(u, users) {
@@ -76,7 +64,7 @@ function eligibleAdvisors(users) { return users.filter(u => u.role === 'advisor'
 
 export default function AdminUsers() {
   const me = useAuthStore((s) => s.user)
-  const [users, setUsers] = useState(seedUsers)
+  const [users, setUsers] = useState([])
   const [search, setSearch] = useState('')
   const [roleFilter, setRoleFilter] = useState('all')
   const [modalOpen, setModalOpen] = useState(false)

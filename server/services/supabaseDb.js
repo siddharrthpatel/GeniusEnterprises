@@ -445,18 +445,6 @@ async function getPortfolio(userId) {
       }
     }
 
-    // Default realistic portfolio for client if none found yet
-    if (!holdings.length) {
-      holdings.push(
-        { symbol: 'NIFTYBEES', name: 'Nippon India Nifty 50 ETF', units: 450, avgPrice: 220.5, currentPrice: 248.8, totalValue: 111960, returnPct: 12.8 },
-        { symbol: 'HDFCBANK', name: 'HDFC Bank Ltd', units: 100, avgPrice: 1540.0, currentPrice: 1680.5, totalValue: 168050, returnPct: 9.1 },
-        { symbol: 'TCS', name: 'Tata Consultancy Services', units: 35, avgPrice: 3450.0, currentPrice: 3820.0, totalValue: 133700, returnPct: 10.7 },
-        { symbol: 'ICICIPRU', name: 'ICICI Prudential Bluechip Fund', units: 820, avgPrice: 85.0, currentPrice: 98.4, totalValue: 80688, returnPct: 15.76 }
-      );
-      totalInvested = holdings.reduce((s, h) => s + (h.units * h.avgPrice), 0);
-      totalValue = holdings.reduce((s, h) => s + (h.totalValue || (h.units * h.currentPrice)), 0);
-    }
-
     const returnsPct = totalInvested > 0 ? ((totalValue - totalInvested) / totalInvested) * 100 : 0;
     const portfolio = {
       totalValue: Math.round(totalValue),
@@ -470,9 +458,9 @@ async function getPortfolio(userId) {
   } catch (err) {
     console.error('[supabaseDb.getPortfolio]', err.message);
     return {
-      totalValue: 494398,
-      totalInvested: 435000,
-      returnsPct: 13.65,
+      totalValue: 0,
+      totalInvested: 0,
+      returnsPct: 0,
       holdings: [],
       transactions: [],
     };

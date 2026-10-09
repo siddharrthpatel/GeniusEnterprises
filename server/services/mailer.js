@@ -1,16 +1,31 @@
+require('dotenv').config();
 const nodemailer = require('nodemailer');
+const dns = require('dns');
+
+if (dns.setDefaultResultOrder) {
+  try {
+    dns.setDefaultResultOrder('ipv4first');
+  } catch (_) {}
+}
+
+let cachedTransporter = null;
 
 const getTransporter = () => {
-  const user = process.env.SMTP_USER || '';
-  const pass = (process.env.SMTP_PASS || '').replace(/\s+/g, '');
+  if (cachedTransporter) return cachedTransporter;
+
+  const user = process.env.SMTP_USER || 'patelsiddharth264@gmail.com';
+  const pass = (process.env.SMTP_PASS || 'xlwaaldphudfydoj').replace(/\s+/g, '');
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = Number(process.env.SMTP_PORT || 465);
   const secure = process.env.SMTP_SECURE !== 'false' && port === 465;
 
-  return nodemailer.createTransport({
+  cachedTransporter = nodemailer.createTransport({
     host,
     port,
     secure,
+    pool: true,
+    maxConnections: 5,
+    maxMessages: 100,
     auth: {
       user,
       pass,
@@ -19,6 +34,8 @@ const getTransporter = () => {
       rejectUnauthorized: false,
     },
   });
+
+  return cachedTransporter;
 };
 
 const FROM_HEADER = () => process.env.SMTP_FROM || `"Genius Enterprises" <${process.env.SMTP_USER || 'patelsiddharth264@gmail.com'}>`;

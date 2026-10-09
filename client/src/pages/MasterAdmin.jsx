@@ -206,42 +206,28 @@ export default function MasterAdmin({ mode = 'full' }) {
   const [stockSearchQuery, setStockSearchQuery] = useState('')
 
   const load = async () => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
-    if (isLocalAuth) {
-      const lp = loadLocalPlatform()
+    try {
+      const [k, d, n, ac, mc] = await Promise.all([
+        api.get('/platform/keys').catch(() => ({ data: { keys: {} } })),
+        api.get('/platform/dashboards').catch(() => ({ data: { dashboards: DEFAULT_DASHBOARDS } })),
+        api.get('/platform/notices?audience=all').catch(() => ({ data: { notices: [] } })),
+        api.get('/platform/api-access').catch(() => ({ data: { apiAccess: DEFAULT_API_ACCESS() } })),
+        api.get('/platform/market-config').catch(() => ({ data: { marketConfig: defaultMarketConfig(), cacheMeta: null } }))
+      ])
       setKeys({
-        supabase_url: lp.keys.supabase_url || '',
-        supabase_anon_key: maskKey(lp.keys.supabase_anon_key) || '',
-        gemini_api_key: maskKey(lp.keys.gemini_api_key) || ''
+        supabase_url: k.data?.keys?.supabase_url || '',
+        supabase_anon_key: k.data?.keys?.supabase_anon_key || '',
+        gemini_api_key: k.data?.keys?.gemini_api_key || ''
       })
-      const allDash = lp.dashboards?.length ? lp.dashboards : DEFAULT_DASHBOARDS
+      const allDash = (d.data?.dashboards && d.data.dashboards.length) ? d.data.dashboards : DEFAULT_DASHBOARDS
       setDashboards(allDash.filter((db) => db.id !== 'admin' && db.role !== 'admin'))
-      setApiAccess(lp.apiAccess || DEFAULT_API_ACCESS())
-      setNotices(lp.notices || [])
-      setMarketConfig(lp.marketConfig || defaultMarketConfig())
-      setCacheMeta(null)
+      setApiAccess(ac.data?.apiAccess || DEFAULT_API_ACCESS())
+      setNotices(n.data?.notices || [])
+      setMarketConfig(mc.data?.marketConfig || defaultMarketConfig())
+      setCacheMeta(mc.data?.cacheMeta || null)
+    } finally {
       setLoading(false)
-      return
     }
-    const [k, d, n, ac, mc] = await Promise.all([
-      api.get('/platform/keys').catch(() => ({ data: { keys: {} } })),
-      api.get('/platform/dashboards').catch(() => ({ data: { dashboards: DEFAULT_DASHBOARDS } })),
-      api.get('/platform/notices?audience=all').catch(() => ({ data: { notices: [] } })),
-      api.get('/platform/api-access').catch(() => ({ data: { apiAccess: DEFAULT_API_ACCESS() } })),
-      api.get('/platform/market-config').catch(() => ({ data: { marketConfig: defaultMarketConfig(), cacheMeta: null } }))
-    ])
-    setKeys({
-      supabase_url: k.data?.keys?.supabase_url || '',
-      supabase_anon_key: k.data?.keys?.supabase_anon_key || '',
-      gemini_api_key: k.data?.keys?.gemini_api_key || ''
-    })
-    const allDash = (d.data?.dashboards && d.data.dashboards.length) ? d.data.dashboards : DEFAULT_DASHBOARDS
-    setDashboards(allDash.filter((db) => db.id !== 'admin' && db.role !== 'admin'))
-    setApiAccess(ac.data?.apiAccess || DEFAULT_API_ACCESS())
-    setNotices(n.data?.notices || [])
-    setMarketConfig(mc.data?.marketConfig || defaultMarketConfig())
-    setCacheMeta(mc.data?.cacheMeta || null)
-    setLoading(false)
   }
 
   useEffect(() => { load().catch(() => { setLoading(false) }) }, [])
@@ -254,7 +240,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const saveApiAccess = async () => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       if (isLocalAuth) {
         const lp = loadLocalPlatform()
@@ -289,7 +275,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   const saveKeys = async (e) => {
     e.preventDefault()
     setMsg('')
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       if (isLocalAuth) {
         const lp = loadLocalPlatform()
@@ -331,7 +317,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const toggleDash = async (id, isActive) => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       if (isLocalAuth) {
         const lp = loadLocalPlatform()
@@ -354,7 +340,7 @@ export default function MasterAdmin({ mode = 'full' }) {
 
   const postNotice = async (e) => {
     e.preventDefault()
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       if (isLocalAuth) {
         const lp = loadLocalPlatform()
@@ -383,7 +369,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const toggleNotice = async (n) => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       if (isLocalAuth) {
         const lp = loadLocalPlatform()
@@ -404,7 +390,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const deleteNotice = async (id) => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       if (isLocalAuth) {
         const lp = loadLocalPlatform()
@@ -426,7 +412,7 @@ export default function MasterAdmin({ mode = 'full' }) {
     if (!newStockCode.trim()) return
     const c = newStockCode.trim().toUpperCase()
     const l = newStockLabel.trim() || c
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       if (isLocalAuth) {
         setMarketConfig((prev) => ({
@@ -459,7 +445,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const toggleMarketStock = async (code, isActive) => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       setMarketConfig((prev) => ({
         ...prev,
@@ -490,7 +476,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const toggleMarketIndex = async (code, isActive) => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       setMarketConfig((prev) => ({
         ...prev,
@@ -521,7 +507,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const saveInterval = async (refreshIntervalMs) => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     const ms = Math.max(60000, Math.min(3600000, Number(refreshIntervalMs) || 300000))
     try {
       setMarketConfig((prev) => ({ ...prev, refreshIntervalMs: ms }))
@@ -545,7 +531,7 @@ export default function MasterAdmin({ mode = 'full' }) {
   }
 
   const saveMarketConfig = async () => {
-    const isLocalAuth = useAuthStore.getState().isLocalUser()
+    const isLocalAuth = false
     try {
       const payload = {
         activeStocks: marketConfig.activeStocks,

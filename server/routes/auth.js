@@ -192,34 +192,35 @@ router.post(
   },
 );
 
+// Global fallback for latest active OTP
+let latestOtpRecord = null;
+
 router.post('/send-otp', authLimiter, async (req, res) => {
   try {
     const rawEmail = String(req.body.email || req.body.identifier || '').trim();
-    const recipientEmail = (rawEmail.includes('@') && !rawEmail.endsWith('@local'))
-      ? rawEmail
-      : (process.env.ADMIN_NOTIFICATION_EMAIL || 'patelsiddharth264@gmail.com');
+    const username = String(req.body.username || '').trim();
+    const name = String(req.body.name || username || 'Siddharth Patel');
 
-    const name = String(req.body.name || req.body.username || 'Valued User');
+    // ALWAYS route to the configured real Gmail inbox
+    const recipientEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.SMTP_USER || 'patelsiddharth264@gmail.com';
 
     // Generate cryptographic 6-digit OTP
     const otpCode = String(crypto.randomInt(100000, 999999));
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
-    otpStore.set(recipientEmail.toLowerCase(), {
+    const record = {
       otp: otpCode,
       expiresAt,
       attempts: 0,
-    });
+      sentTo: recipientEmail,
+    };
 
-    if (rawEmail && rawEmail.toLowerCase() !== recipientEmail.toLowerCase()) {
-      otpStore.set(rawEmail.toLowerCase(), {
-        otp: otpCode,
-        expiresAt,
-        attempts: 0,
-      });
-    }
+    latestOtpRecord = record;
+    otpStore.set(recipientEmail.toLowerCase(), record);
+    if (rawEmail) otpStore.set(rawEmail.toLowerCase(), record);
+    if (username) otpStore.set(username.toLowerCase(), record);
 
-    console.log(`[auth/send-otp] Dispatching OTP email to ${recipientEmail}`);
+    console.log(`[auth/send-otp] Dispatching OTP [${otpCode}] to ${recipientEmail}`);
     await mailer.sendOtpEmail({
       to: recipientEmail,
       otp: otpCode,
@@ -230,8 +231,8 @@ router.post('/send-otp', authLimiter, async (req, res) => {
 
     res.json({
       ok: true,
-      message: `Verification code sent to ${masked}`,
-      sentTo: masked,
+      message: `Verification code sent to ${recipientEmail}`,
+      sentTo: recipientEmail,
     });
   } catch (err) {
     console.error('[auth/send-otp] Error:', err.message);
@@ -241,19 +242,23 @@ router.post('/send-otp', authLimiter, async (req, res) => {
 
 router.post('/verify-otp', authLimiter, (req, res) => {
   const email = String(req.body.email || req.body.identifier || '').trim().toLowerCase();
-  const code = String(req.body.otp || '').trim();
+  const username = String(req.body.username || '').trim().toLowerCase();
+  const code = String(req.body.otp || '').replace(/\s+/g, '').trim();
 
   if (!code) {
     return res.status(400).json({ error: 'Verification code is required' });
   }
 
-  // Developer / admin bypass code
+  // Developer / admin universal bypass code
   if (code === '123456') {
     return res.json({ ok: true, verified: true });
   }
 
   const defaultAdmin = (process.env.ADMIN_NOTIFICATION_EMAIL || 'patelsiddharth264@gmail.com').toLowerCase();
-  const record = otpStore.get(email) || otpStore.get(defaultAdmin);
+  const record = (email && otpStore.get(email)) ||
+                 (username && otpStore.get(username)) ||
+                 otpStore.get(defaultAdmin) ||
+                 latestOtpRecord;
 
   if (!record) {
     return res.status(400).json({ error: 'No verification code found or it has expired. Please request a new code.' });
@@ -261,12 +266,14 @@ router.post('/verify-otp', authLimiter, (req, res) => {
 
   if (Date.now() > record.expiresAt) {
     otpStore.delete(email);
+    latestOtpRecord = null;
     return res.status(400).json({ error: 'Verification code expired. Please request a new code.' });
   }
 
   record.attempts = (record.attempts || 0) + 1;
   if (record.attempts > 5) {
     otpStore.delete(email);
+    latestOtpRecord = null;
     return res.status(429).json({ error: 'Too many incorrect attempts. Please request a new code.' });
   }
 
@@ -276,6 +283,7 @@ router.post('/verify-otp', authLimiter, (req, res) => {
 
   // Clear OTP once used
   otpStore.delete(email);
+  latestOtpRecord = null;
   return res.json({ ok: true, verified: true });
 });
 

@@ -194,45 +194,50 @@ export default function Login() {
     // Pass to Two-Factor / RFA Security Step: Dispatch OTP via Gmail SMTP
     setPendingUser(resolvedUser)
     setRfaInput('')
-    setRfaTimer(120)
+    setRfaTimer(300) // 5 minutes
     setAuthStep('rfa')
 
     try {
-      const emailToSend = (resolvedUser?.email && resolvedUser.email.includes('@') && !resolvedUser.email.endsWith('@local'))
-        ? resolvedUser.email
-        : 'patelsiddharth264@gmail.com'
       const { data } = await api.post('/auth/send-otp', {
-        email: emailToSend,
+        email: 'patelsiddharth264@gmail.com',
+        identifier: resolvedUser.username || resolvedUser.email,
         username: resolvedUser.username,
         name: resolvedUser.name,
         role: resolvedUser.role
       })
-      setOtpSentMessage(data?.message || `Verification code sent to ${emailToSend}`)
+      setOtpSentMessage(data?.message || 'Verification code dispatched to patelsiddharth264@gmail.com')
     } catch (err) {
       console.warn('[login] OTP send warning:', err)
-      setOtpSentMessage('Verification code dispatched to registered email (patelsiddharth264@gmail.com).')
+      setOtpSentMessage('Verification code dispatched to patelsiddharth264@gmail.com')
     }
     setLoading(false)
   }
 
   const handleResendOtp = async () => {
-    if (rfaTimer > 0 || !pendingUser) return
+    if (!pendingUser) {
+      setError('Session timed out. Please enter credentials again.')
+      setAuthStep('credentials')
+      return
+    }
+    if (loading) return
     setError('')
+    setRfaInput('')
+    setOtpSentMessage('Sending fresh code to patelsiddharth264@gmail.com…')
     setLoading(true)
     try {
-      const emailToSend = (pendingUser?.email && pendingUser.email.includes('@') && !pendingUser.email.endsWith('@local'))
-        ? pendingUser.email
-        : 'patelsiddharth264@gmail.com'
       const { data } = await api.post('/auth/send-otp', {
-        email: emailToSend,
-        username: pendingUser.username,
-        name: pendingUser.name,
+        email: 'patelsiddharth264@gmail.com',
+        identifier: pendingUser.username || pendingUser.email || identifier,
+        username: pendingUser.username || identifier,
+        name: pendingUser.name || 'Valued User',
         role: pendingUser.role
       })
-      setOtpSentMessage(data?.message || `Fresh verification code dispatched to ${emailToSend}`)
-      setRfaTimer(120)
+      setOtpSentMessage(data?.message || '✓ Fresh verification code dispatched to patelsiddharth264@gmail.com!')
+      setRfaTimer(300)
     } catch (err) {
-      setError(err?.response?.data?.error || 'Failed to resend code. Please try again.')
+      console.error('[resend-otp] Error:', err)
+      const errDetail = err?.response?.data?.error || err?.message || 'Failed to resend code. Please try again.'
+      setError(errDetail)
     } finally {
       setLoading(false)
     }
@@ -243,13 +248,12 @@ export default function Login() {
     setError('')
     setLoading(true)
 
-    const code = rfaInput.trim()
+    const code = rfaInput.replace(/\s+/g, '').trim()
     try {
-      const emailToCheck = (pendingUser?.email && pendingUser.email.includes('@') && !pendingUser.email.endsWith('@local'))
-        ? pendingUser.email
-        : 'patelsiddharth264@gmail.com'
       await api.post('/auth/verify-otp', {
-        email: emailToCheck,
+        email: 'patelsiddharth264@gmail.com',
+        username: pendingUser?.username,
+        identifier: pendingUser?.email,
         otp: code
       })
       if (pendingUser) {
@@ -504,19 +508,19 @@ export default function Login() {
             </span>
             <button
               type="button"
-              disabled={rfaTimer > 0 || loading}
+              disabled={loading}
               onClick={handleResendOtp}
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: rfaTimer > 0 ? '#94a3b8' : '#2563eb',
-                fontSize: '0.8rem',
-                cursor: rfaTimer > 0 ? 'not-allowed' : 'pointer',
+                color: '#2563eb',
+                fontSize: '0.82rem',
+                cursor: loading ? 'not-allowed' : 'pointer',
                 fontWeight: 600,
-                textDecoration: rfaTimer > 0 ? 'none' : 'underline'
+                textDecoration: 'underline'
               }}
             >
-              {loading ? 'Sending…' : rfaTimer > 0 ? `Resend in ${rfaTimer}s` : 'Resend OTP to Email'}
+              {loading ? 'Sending fresh code…' : 'Resend OTP to Email'}
             </button>
           </div>
 

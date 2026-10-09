@@ -19,16 +19,7 @@ import { useAuthStore } from '../store/auth'
 import { fmtINR, fmtPct, initials, roleLabel, downloadCSV, downloadExcel, printHTML, rowsToHTMLTable, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN } from '../utils/format'
 import api from '../api'
 
-const sampleClients = [
-  { id: 'c1', name: 'Meera Reddy', email: 'client@genius.com', phone: '+91 9810000008', pan: 'CLMR1234H', rmName: 'Rahul Verma', advisorName: 'Neha Gupta', invested: 4800000, current: 5640000, status: 'active', joined: '2025-01-05' },
-  { id: 'c2', name: 'Rajesh Khanna', email: 'rajesh@example.com', phone: '+91 9810000009', pan: 'CLRK1234I', rmName: 'Rahul Verma', advisorName: 'Neha Gupta', invested: 4500000, current: 5260000, status: 'active', joined: '2025-01-20' },
-  { id: 'c3', name: 'Sunita Kapoor', email: 'sunita@example.com', phone: '+91 9810000010', pan: 'CLSK1234J', rmName: 'Rahul Verma', advisorName: 'Piyush Shah', invested: 2100000, current: 2530000, status: 'active', joined: '2025-02-10' },
-  { id: 'c4', name: 'Vijay Malhotra', email: 'vijay.m@example.com', phone: '+91 9810000011', pan: 'CLVM1234K', rmName: 'Ankit Gupta', advisorName: 'Neha Gupta', invested: 3400000, current: 4020000, status: 'active', joined: '2025-02-22' },
-  { id: 'c5', name: 'Anil Deshmukh', email: 'anil.d@example.com', phone: '+91 9810000012', pan: 'CLAD1234L', rmName: 'Rahul Verma', advisorName: 'Neha Gupta', invested: 3200000, current: 3750000, status: 'active', joined: '2025-03-01' },
-  { id: 'c6', name: 'Kavita Iyer', email: 'kavita.i@example.com', phone: '+91 9810000013', pan: 'CLKI1234M', rmName: 'Rahul Verma', advisorName: 'Piyush Shah', invested: 2400000, current: 2790000, status: 'active', joined: '2025-03-12' },
-  { id: 'c7', name: 'Manoj Tiwari', email: 'manoj.t@example.com', phone: '+91 9810000014', pan: 'CLMT1234N', rmName: 'Ankit Gupta', advisorName: 'Neha Gupta', invested: 1800000, current: 2080000, status: 'active', joined: '2025-03-25' },
-  { id: 'c8', name: 'Rina Das', email: 'rina.d@example.com', phone: '+91 9810000015', pan: 'CLRD1234O', rmName: 'Rahul Verma', advisorName: 'Piyush Shah', invested: 1400000, current: 1610000, status: 'active', joined: '2025-04-04' }
-]
+const sampleClients = []
 
 const emptyCustomerForm = {
   name: '', email: '', phone: '', pan: '', dob: '',
@@ -65,7 +56,7 @@ async function tryServerDownload(url, filename) {
 
 export default function ClientsList() {
   const user = useAuthStore((s) => s.user)
-  const [clients, setClients] = useState(sampleClients)
+  const [clients, setClients] = useState([])
   const [staffUsers, setStaffUsers] = useState([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -93,24 +84,18 @@ export default function ClientsList() {
           const mapped = res.data.users.map(u => ({
             id: u.id || u._id,
             name: u.name, email: u.email, phone: u.phone, pan: u.pan,
-            invested: Math.random() * 5000000 + 500000,
-            current: Math.random() * 6000000 + 600000,
+            invested: u.invested || 0,
+            current: u.current || 0,
             status: u.status || 'active',
             joined: u.createdAt,
-            rmName: 'Rahul Verma', advisorName: 'Neha Gupta'
+            rmName: u.rmName || '—', advisorName: u.advisorName || '—'
           }))
-          setClients(mapped.length ? mapped : sampleClients)
+          setClients(mapped)
         }
         const uRes = await api.get('/users')
         if (uRes.data?.users) setStaffUsers(uRes.data.users)
       } catch (e) {
-        setStaffUsers([
-          { id: 'u2', name: 'Priya Sharma', role: 'arm' },
-          { id: 'u3', name: 'Rahul Verma', role: 'rm' },
-          { id: 'u4', name: 'Ankit Gupta', role: 'rm' },
-          { id: 'u5', name: 'Neha Gupta', role: 'advisor' },
-          { id: 'u6', name: 'Piyush Shah', role: 'advisor' },
-        ])
+        setStaffUsers([])
       }
     }
     load()
