@@ -15,4 +15,5 @@ yarn-error.log*
 server/.env
 server/.env.*
 server/data/platform.json
+server/data/active_otps.json
 *.log

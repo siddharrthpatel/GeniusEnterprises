@@ -13,7 +13,9 @@ import {
   faDownload,
   faUserPlus,
   faXmark,
-  faCheck
+  faCheck,
+  faTrashCan,
+  faTriangleExclamation
 } from '@fortawesome/free-solid-svg-icons'
 import { useAuthStore } from '../store/auth'
 import { fmtINR, fmtPct, initials, roleLabel, downloadCSV, downloadExcel, printHTML, rowsToHTMLTable, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN } from '../utils/format'
@@ -68,9 +70,29 @@ export default function ClientsList() {
   const [addSuccess, setAddSuccess] = useState('')
   const [adding, setAdding] = useState(false)
 
+  // Delete Client modal & action
+  const [delConfirm, setDelConfirm] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+  const [delError, setDelError] = useState('')
+
   const isStaff = ['admin', 'branch_manager', 'arm', 'rm', 'advisor', 'sub_broker', 'employee'].includes(user?.role)
   const isPrivileged = user?.role === 'admin'
   const canAddCustomer = isStaff
+
+  const handleDeleteClient = async () => {
+    if (!delConfirm) return
+    setDeleting(true)
+    setDelError('')
+    try {
+      await api.delete(`/users/${delConfirm.id}`)
+      setClients((prev) => prev.filter((c) => c.id !== delConfirm.id))
+      setDelConfirm(null)
+    } catch (err) {
+      setDelError(err.response?.data?.error || err.message || 'Failed to delete client')
+    } finally {
+      setDeleting(false)
+    }
+  }
 
   const rms = staffUsers.filter(u => u.role === 'rm')
   const advisors = staffUsers.filter(u => u.role === 'advisor')
@@ -431,7 +453,7 @@ export default function ClientsList() {
                 <th>Return %</th>
                 <th>Status</th>
                 <th>Joined</th>
-                {isStaff && <th style={{ width: 160 }}>Reports</th>}
+                {isStaff && <th style={{ minWidth: isPrivileged ? 250 : 160 }}>Actions / Reports</th>}
               </tr>
             </thead>
             <tbody>
@@ -463,13 +485,36 @@ export default function ClientsList() {
                     <td style={{ fontSize: '0.82rem', color: '#666' }}>{c.joined ? new Date(c.joined).toLocaleDateString() : '—'}</td>
                     {isStaff && (
                       <td>
-                        <div className="flex-gap">
+                        <div className="flex-gap" style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
                           <button onClick={() => downloadOne(c, 'pdf')} className="btn-sm btn-danger" style={{ border: 'none', cursor: 'pointer', padding: '0.3rem 0.55rem', fontSize: '0.72rem', borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <FontAwesomeIcon icon={faFilePdf} size="xs" /> PDF
                           </button>
                           <button onClick={() => downloadOne(c, 'xlsx')} className="btn-sm btn-success" style={{ border: 'none', cursor: 'pointer', padding: '0.3rem 0.55rem', fontSize: '0.72rem', borderRadius: 6, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <FontAwesomeIcon icon={faFileExcel} size="xs" /> XLSX
                           </button>
+                          {isPrivileged && (
+                            <button
+                              onClick={() => { setDelError(''); setDelConfirm(c) }}
+                              className="btn-sm"
+                              style={{
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '0.32rem 0.65rem',
+                                fontSize: '0.72rem',
+                                borderRadius: 6,
+                                background: '#dc2626',
+                                color: '#ffffff',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: 4,
+                                fontWeight: 600,
+                                whiteSpace: 'nowrap'
+                              }}
+                              title="Delete Client"
+                            >
+                              <FontAwesomeIcon icon={faTrashCan} size="xs" /> Delete Client
+                            </button>
+                          )}
                         </div>
                       </td>
                     )}
@@ -575,6 +620,56 @@ export default function ClientsList() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {delConfirm && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !deleting) setDelConfirm(null) }}>
+          <div className="modal-box" style={{ maxWidth: 460 }}>
+            <div className="modal-head" style={{ borderBottom: '1px solid #fee2e2' }}>
+              <h3 style={{ color: '#b91c1c', display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
+                <FontAwesomeIcon icon={faTriangleExclamation} /> Delete Client Account
+              </h3>
+              <button type="button" className="modal-close" onClick={() => !deleting && setDelConfirm(null)}>
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+            <div className="modal-body">
+              {delError && <div className="form-error" style={{ marginBottom: 12 }}>{delError}</div>}
+              <p style={{ margin: '0 0 12px', fontSize: '0.92rem', color: '#1e293b', lineHeight: 1.5 }}>
+                Are you sure you want to permanently delete client <strong>{delConfirm.name}</strong> ({delConfirm.email})?
+              </p>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: '#b91c1c', background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: 8 }}>
+                ⚠️ This will permanently remove the client profile and purge all associated records.
+              </p>
+            </div>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button type="button" className="btn-outline" onClick={() => setDelConfirm(null)} disabled={deleting}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                disabled={deleting}
+                onClick={handleDeleteClient}
+                style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '0.55rem 1.15rem',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                <FontAwesomeIcon icon={faTrashCan} />
+                {deleting ? 'Deleting…' : 'Delete Client'}
+              </button>
+            </div>
           </div>
         </div>
       )}

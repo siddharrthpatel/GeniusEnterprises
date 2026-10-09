@@ -90,7 +90,10 @@ import {
   faCalendar,
   faCopy,
   faRightFromBracket,
-  faLock
+  faLock,
+  faTrashCan,
+  faTriangleExclamation,
+  faXmark
 } from '@fortawesome/free-solid-svg-icons'
 import {
   BarChart,
@@ -584,6 +587,29 @@ function AdminDashboard() {
     users: []
   })
 
+  const [delUserConfirm, setDelUserConfirm] = useState(null)
+  const [deletingUser, setDeletingUser] = useState(false)
+  const [delUserError, setDelUserError] = useState('')
+
+  const handleDeleteClient = async () => {
+    if (!delUserConfirm) return
+    setDeletingUser(true)
+    setDelUserError('')
+    try {
+      await api.delete(`/users/${delUserConfirm.id}`)
+      setData(prev => ({
+        ...prev,
+        users: Array.isArray(prev.users) ? prev.users.filter(u => (u.id || u._id) !== delUserConfirm.id) : [],
+        clientsCount: Math.max(0, (prev.clientsCount || 0) - (delUserConfirm.role === 'client' ? 1 : 0))
+      }))
+      setDelUserConfirm(null)
+    } catch (err) {
+      setDelUserError(err.response?.data?.error || err.message || 'Failed to delete client')
+    } finally {
+      setDeletingUser(false)
+    }
+  }
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -806,6 +832,7 @@ function AdminDashboard() {
                 <th>Status</th>
                 <th>Joined</th>
                 <th>Reporting To</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -824,11 +851,38 @@ function AdminDashboard() {
                   <td><span className={`badge badge-${u.status === 'active' ? 'active' : 'inactive'}`}>{u.status || 'active'}</span></td>
                   <td style={{ fontSize: '0.82rem', color: '#666' }}>{u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '—'}</td>
                   <td style={{ fontSize: '0.82rem', color: '#64748b' }}>{u.reportsToName || 'Admin Office'}</td>
+                  <td>
+                    {u.role === 'client' ? (
+                      <button
+                        className="btn-danger btn-sm"
+                        onClick={() => { setDelUserError(''); setDelUserConfirm(u) }}
+                        style={{
+                          border: 'none',
+                          padding: '0.28rem 0.6rem',
+                          fontSize: '0.72rem',
+                          borderRadius: 6,
+                          cursor: 'pointer',
+                          background: '#dc2626',
+                          color: '#fff',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 4,
+                          fontWeight: 600,
+                          whiteSpace: 'nowrap'
+                        }}
+                        title="Delete Client"
+                      >
+                        <FontAwesomeIcon icon={faTrashCan} size="xs" /> Delete Client
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Core Staff</span>
+                    )}
+                  </td>
                 </tr>
               ))}
               {(!Array.isArray(data?.users) || data.users.length === 0) && (
                 <tr>
-                  <td colSpan="5" style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b', fontSize: '0.85rem' }}>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b', fontSize: '0.85rem' }}>
                     No users loaded. Click "Manage Users" to view or create accounts.
                   </td>
                 </tr>
@@ -837,6 +891,56 @@ function AdminDashboard() {
           </table>
         </div>
       </div>
+
+      {delUserConfirm && (
+        <div className="modal-overlay" onClick={(e) => { if (e.target === e.currentTarget && !deletingUser) setDelUserConfirm(null) }}>
+          <div className="modal-box" style={{ maxWidth: 460 }}>
+            <div className="modal-head" style={{ borderBottom: '1px solid #fee2e2' }}>
+              <h3 style={{ color: '#b91c1c', display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
+                <FontAwesomeIcon icon={faTriangleExclamation} /> Delete Client Account
+              </h3>
+              <button type="button" className="modal-close" onClick={() => !deletingUser && setDelUserConfirm(null)}>
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+            <div className="modal-body">
+              {delUserError && <div className="form-error" style={{ marginBottom: 12 }}>{delUserError}</div>}
+              <p style={{ margin: '0 0 12px', fontSize: '0.92rem', color: '#1e293b', lineHeight: 1.5 }}>
+                Are you sure you want to delete client <strong>{delUserConfirm.name}</strong> ({delUserConfirm.email})?
+              </p>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: '#b91c1c', background: '#fef2f2', border: '1px solid #fecaca', padding: '10px 14px', borderRadius: 8 }}>
+                ⚠️ This will permanently remove the client profile and purge all associated records.
+              </p>
+            </div>
+            <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+              <button type="button" className="btn-outline" onClick={() => setDelUserConfirm(null)} disabled={deletingUser}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn-danger"
+                disabled={deletingUser}
+                onClick={handleDeleteClient}
+                style={{
+                  background: '#dc2626',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '0.55rem 1.15rem',
+                  borderRadius: 8,
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 6
+                }}
+              >
+                <FontAwesomeIcon icon={faTrashCan} />
+                {deletingUser ? 'Deleting…' : 'Delete Client'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="platform-controls-admin-only">
         <div style={{

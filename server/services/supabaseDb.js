@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 
@@ -57,15 +59,66 @@ function clearCache() {
   cache.usersAt = 0;
 }
 
+// Persistent deleted users tracking
+const DELETED_USERS_FILE = path.join(__dirname, '../data/deleted_users.json');
+
+function getDeletedSet() {
+  try {
+    if (fs.existsSync(DELETED_USERS_FILE)) {
+      const arr = JSON.parse(fs.readFileSync(DELETED_USERS_FILE, 'utf8'));
+      if (Array.isArray(arr)) {
+        return new Set(arr.map((x) => String(x).toLowerCase().trim()));
+      }
+    }
+  } catch (_) {}
+  return new Set();
+}
+
+function markDeleted(id, email) {
+  const set = getDeletedSet();
+  if (id) set.add(String(id).toLowerCase().trim());
+  if (email) set.add(String(email).toLowerCase().trim());
+  try {
+    const dir = path.dirname(DELETED_USERS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(DELETED_USERS_FILE, JSON.stringify([...set], null, 2), 'utf8');
+  } catch (_) {}
+}
+
+function isDeleted(idOrEmail) {
+  if (!idOrEmail) return false;
+  const set = getDeletedSet();
+  return set.has(String(idOrEmail).toLowerCase().trim());
+}
+
+// Persistent custom/created users storage
+const CUSTOM_USERS_FILE = path.join(__dirname, '../data/custom_users.json');
+
+function loadCustomUsers() {
+  try {
+    if (fs.existsSync(CUSTOM_USERS_FILE)) {
+      const data = JSON.parse(fs.readFileSync(CUSTOM_USERS_FILE, 'utf8'));
+      return Array.isArray(data) ? data : [];
+    }
+  } catch (_) {}
+  return [];
+}
+
+function saveCustomUsers(list) {
+  try {
+    const dir = path.dirname(CUSTOM_USERS_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(CUSTOM_USERS_FILE, JSON.stringify(list, null, 2), 'utf8');
+  } catch (_) {}
+}
+
+// Allowed static usernames - strictly 1 admin, 1 BM, 1 RM
 const USERNAME_MAP = {
   admin: 'admin@genius.com',
+  bm: 'bm@genius.com',
   branch: 'bm@genius.com',
   rm: 'rm1@genius.com',
-  arm: 'arm@genius.com',
-  advisor: 'advisor@genius.com',
-  broker: 'broker@genius.com',
-  employee: 'employee@genius.com',
-  client: 'client1@genius.com',
+  rm1: 'rm1@genius.com',
 };
 
 async function resolveEmail(identifier) {
@@ -87,7 +140,7 @@ async function resolveEmail(identifier) {
 }
 
 async function getUserById(id) {
-  if (!id) return null;
+  if (!id || isDeleted(id)) return null;
   try {
     const sb = await getAdminClient();
     const { data: p, error } = await sb
@@ -95,7 +148,13 @@ async function getUserById(id) {
       .select('*')
       .eq('id', id)
       .maybeSingle();
-    if (error || !p) return null;
+    if (error || !p || isDeleted(p.id) || isDeleted(p.email)) {
+      const customMatch = loadCustomUsers().find((u) => u.id === id);
+      if (customMatch && !isDeleted(customMatch.id) && !isDeleted(customMatch.email)) {
+        return customMatch;
+      }
+      return null;
+    }
 
     let pan = p.pan || null;
     let dob = p.dob || null;
@@ -133,13 +192,16 @@ async function getUserById(id) {
       createdAt: p.created_at,
     };
   } catch (err) {
-    console.error('[supabaseDb.getUserById]', err.message);
+    const customMatch = loadCustomUsers().find((u) => u.id === id);
+    if (customMatch && !isDeleted(customMatch.id) && !isDeleted(customMatch.email)) {
+      return customMatch;
+    }
     return null;
   }
 }
 
 async function getUserByEmail(email) {
-  if (!email) return null;
+  if (!email || isDeleted(email)) return null;
   try {
     const sb = await getAdminClient();
     const { data: p, error } = await sb
@@ -147,16 +209,25 @@ async function getUserByEmail(email) {
       .select('*')
       .ilike('email', email.trim())
       .maybeSingle();
-    if (error || !p) return null;
+    if (error || !p || isDeleted(p.id) || isDeleted(p.email)) {
+      const customMatch = loadCustomUsers().find((u) => u.email?.toLowerCase() === email.toLowerCase());
+      if (customMatch && !isDeleted(customMatch.id) && !isDeleted(customMatch.email)) {
+        return customMatch;
+      }
+      return null;
+    }
     return getUserById(p.id);
   } catch (err) {
-    console.error('[supabaseDb.getUserByEmail]', err.message);
+    const customMatch = loadCustomUsers().find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    if (customMatch && !isDeleted(customMatch.id) && !isDeleted(customMatch.email)) {
+      return customMatch;
+    }
     return null;
   }
 }
 
 async function getUserByUsername(username) {
-  if (!username) return null;
+  if (!username || isDeleted(username)) return null;
   try {
     const sb = await getAdminClient();
     const { data: p, error } = await sb
@@ -164,7 +235,7 @@ async function getUserByUsername(username) {
       .select('*')
       .ilike('username', username.trim())
       .maybeSingle();
-    if (error || !p) return null;
+    if (error || !p || isDeleted(p.id) || isDeleted(p.email)) return null;
     return getUserById(p.id);
   } catch (err) {
     console.error('[supabaseDb.getUserByUsername]', err.message);
@@ -173,8 +244,9 @@ async function getUserByUsername(username) {
 }
 
 async function authenticateWithSupabase(identifier, password, requestedRole) {
+  if (isDeleted(identifier)) return { user: null, error: 'User does not exist or has been removed' };
   const email = await resolveEmail(identifier);
-  if (!email) return { user: null, error: 'User name or email is required' };
+  if (!email || isDeleted(email)) return { user: null, error: 'User does not exist or has been removed' };
 
   // Create temporary client for this login attempt
   const tempClient = createClient(supabaseUrl, supabaseAnonKey);
@@ -221,21 +293,32 @@ async function getUsers(filter = {}) {
         .select('*')
         .order('name');
       if (error) throw error;
-      all = (profiles || []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        email: p.email,
-        username: p.username || (p.email ? p.email.split('@')[0] : ''),
-        role: p.role,
-        phone: p.phone,
-        status: p.status || 'active',
-        reportsTo: p.reports_to,
-        rmId: p.rm_id,
-        armId: p.arm_id,
-        advisorId: p.advisor_id,
-        branchId: p.branch_id,
-        createdAt: p.created_at,
-      }));
+      const deletedSet = getDeletedSet();
+      all = (profiles || [])
+        .filter((p) => !deletedSet.has(String(p.id).toLowerCase()) && !deletedSet.has(String(p.email || '').toLowerCase()) && !deletedSet.has(String(p.username || '').toLowerCase()))
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          email: p.email,
+          username: p.username || (p.email ? p.email.split('@')[0] : ''),
+          role: p.role,
+          phone: p.phone,
+          status: p.status || 'active',
+          reportsTo: p.reports_to,
+          rmId: p.rm_id,
+          armId: p.arm_id,
+          advisorId: p.advisor_id,
+          branchId: p.branch_id,
+          createdAt: p.created_at,
+        }));
+      const customList = loadCustomUsers().filter(
+        (u) => !deletedSet.has(String(u.id).toLowerCase()) && !deletedSet.has(String(u.email || '').toLowerCase())
+      );
+      for (const c of customList) {
+        if (!all.some((u) => u.id === c.id || u.email?.toLowerCase() === c.email?.toLowerCase())) {
+          all.push(c);
+        }
+      }
       cache.users = all;
       cache.usersAt = now;
     }
@@ -263,32 +346,55 @@ async function getUsers(filter = {}) {
 async function addUser(userData) {
   try {
     clearCache();
-    const sb = await getAdminClient();
-    const id = userData.id || (await createSupabaseAuthUser(userData));
-    const profileRow = {
+    const id = userData.id || ('u_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 6));
+    const newRecord = {
       id,
       name: userData.name,
       email: userData.email,
-      username: userData.username || (userData.email ? userData.email.split('@')[0] : undefined),
+      username: userData.username || (userData.email ? userData.email.split('@')[0] : id),
       role: userData.role || 'client',
       phone: userData.phone || null,
       status: userData.status || 'active',
-      reports_to: userData.reportsTo || null,
-      rm_id: userData.rmId || null,
-      arm_id: userData.armId || null,
-      advisor_id: userData.advisorId || null,
-      branch_id: userData.branchId || null,
+      reportsTo: userData.reportsTo || null,
+      rmId: userData.rmId || null,
+      armId: userData.armId || null,
+      advisorId: userData.advisorId || null,
+      branchId: userData.branchId || null,
+      pan: userData.pan || null,
+      dob: userData.dob || null,
+      createdAt: new Date().toISOString(),
     };
-    await sb.from('profiles').upsert(profileRow);
+    const currentCustom = loadCustomUsers().filter((u) => u.id !== id && u.email?.toLowerCase() !== userData.email?.toLowerCase());
+    currentCustom.push(newRecord);
+    saveCustomUsers(currentCustom);
 
-    if (userData.role === 'client') {
-      await sb.from('clients').upsert({
-        user_id: id,
-        pan: userData.pan || null,
-        dob: userData.dob || null,
-      });
-    }
-    return getUserById(id);
+    try {
+      const sb = await getAdminClient();
+      const profileRow = {
+        id,
+        name: userData.name,
+        email: userData.email,
+        username: newRecord.username,
+        role: userData.role || 'client',
+        phone: userData.phone || null,
+        status: userData.status || 'active',
+        reports_to: userData.reportsTo || null,
+        rm_id: userData.rmId || null,
+        arm_id: userData.armId || null,
+        advisor_id: userData.advisorId || null,
+        branch_id: userData.branchId || null,
+      };
+      await sb.from('profiles').upsert(profileRow);
+      if (userData.role === 'client') {
+        await sb.from('clients').upsert({
+          user_id: id,
+          pan: userData.pan || null,
+          dob: userData.dob || null,
+        });
+      }
+    } catch (_) {}
+
+    return newRecord;
   } catch (err) {
     console.error('[supabaseDb.addUser]', err.message);
     throw err;
@@ -351,9 +457,18 @@ async function updateUser(id, patch) {
 async function deleteUser(id) {
   try {
     clearCache();
+    const existing = await getUserById(id);
+    markDeleted(id, existing?.email);
+    if (existing?.username) markDeleted(existing.username);
+    const updatedCustom = loadCustomUsers().filter((u) => u.id !== id && u.email?.toLowerCase() !== existing?.email?.toLowerCase());
+    saveCustomUsers(updatedCustom);
     const sb = await getAdminClient();
-    await sb.from('clients').delete().eq('user_id', id);
-    await sb.from('profiles').delete().eq('id', id);
+    try {
+      await sb.from('clients').delete().eq('user_id', id);
+    } catch (_) {}
+    try {
+      await sb.from('profiles').delete().eq('id', id);
+    } catch (_) {}
     delete cache.portfolios[id];
     return true;
   } catch (err) {

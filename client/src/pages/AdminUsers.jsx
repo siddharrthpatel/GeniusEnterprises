@@ -241,7 +241,7 @@ export default function AdminUsers() {
   }
 
   const isSelf = (u) => me && (me.id === u.id || me.email === u.email)
-  const isSeedU1 = (u) => u.id === 'u1'
+  const isProtectedUser = (u) => isSelf(u) || ['admin@genius.com', 'bm@genius.com', 'rm1@genius.com'].includes(u?.email?.toLowerCase())
 
   return (
     <div className="page">
@@ -336,8 +336,8 @@ export default function AdminUsers() {
                       <button
                         className="btn-danger btn-sm"
                         onClick={() => setDelConfirm(u)}
-                        disabled={isSeedU1(u) || isSelf(u)}
-                        title={isSeedU1(u) ? 'Seed user cannot be deleted' : isSelf(u) ? 'Cannot delete yourself' : 'Delete'}
+                        disabled={isProtectedUser(u)}
+                        title={isProtectedUser(u) ? 'Core staff account cannot be deleted' : 'Delete User / Client'}
                       >
                         <FontAwesomeIcon icon={faTrashCan} />
                       </button>
