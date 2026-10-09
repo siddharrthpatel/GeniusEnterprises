@@ -20,6 +20,10 @@ const EMPLOYEE_ROLES = [
   { id: 'admin', label: 'Admin', username: 'admin', password: 'Admin@123', email: 'admin@genius.com' },
   { id: 'branch_manager', label: 'Branch Manager (BM)', username: 'branch', password: 'Bm@123', email: 'bm@genius.com' },
   { id: 'rm', label: 'Relationship Manager (RM)', username: 'rm', password: 'Rm@123', email: 'rm1@genius.com' },
+  { id: 'arm', label: 'Associate RM (ARM)', username: 'arm', password: 'Arm@123', email: 'arm@genius.com' },
+  { id: 'advisor', label: 'Financial Advisor', username: 'advisor', password: 'Adv@123', email: 'advisor@genius.com' },
+  { id: 'sub_broker', label: 'Sub-Broker', username: 'broker', password: 'Broker@123', email: 'broker@genius.com' },
+  { id: 'employee', label: 'Staff Employee', username: 'employee', password: 'Emp@123', email: 'employee@genius.com' }
 ]
 
 const generateCaptchaCode = () => {
@@ -72,7 +76,9 @@ export default function Login() {
     const tab = params.get('tab')
     if (tab === 'employee') {
       setLoginType('employee')
-      setRole('employee')
+      setRole('admin')
+      setUsername('admin')
+      setPassword('Admin@123')
     } else if (tab === 'client') {
       setLoginType('client')
       setRole('client')
@@ -82,8 +88,10 @@ export default function Login() {
   useEffect(() => {
     if (loginType === 'client') {
       setRole('client')
-    } else if (role === 'client') {
-      setRole('employee')
+    } else if (role === 'client' || !role) {
+      setRole('admin')
+      setUsername('admin')
+      setPassword('Admin@123')
     }
   }, [loginType])
 

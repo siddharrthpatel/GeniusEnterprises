@@ -112,13 +112,18 @@ function saveCustomUsers(list) {
   } catch (_) {}
 }
 
-// Allowed static usernames - strictly 1 admin, 1 BM, 1 RM
+// Allowed employee portal usernames
 const USERNAME_MAP = {
   admin: 'admin@genius.com',
   bm: 'bm@genius.com',
   branch: 'bm@genius.com',
   rm: 'rm1@genius.com',
   rm1: 'rm1@genius.com',
+  arm: 'arm@genius.com',
+  advisor: 'advisor@genius.com',
+  broker: 'broker@genius.com',
+  sub_broker: 'broker@genius.com',
+  employee: 'employee@genius.com',
 };
 
 async function resolveEmail(identifier) {
