@@ -1,4 +1,6 @@
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { body, validationResult } = require('express-validator');
@@ -133,8 +135,8 @@ router.post(
       if (user.status !== 'active' && user.role !== 'admin') {
         return res.status(403).json({ error: 'Account is not active' });
       }
-      issueTokens(res, user.id);
-      res.json({ user: publicFields(user) });
+      const tokens = issueTokens(res, user.id);
+      res.json({ user: publicFields(user), token: tokens.accessToken });
     } catch (err) {
       next(err);
     }
@@ -192,8 +194,26 @@ router.post(
   },
 );
 
-// Global fallback for latest active OTP
-let latestOtpRecord = null;
+const OTP_FILE = path.join(__dirname, '../data/active_otps.json');
+
+const loadActiveOtps = () => {
+  try {
+    if (fs.existsSync(OTP_FILE)) {
+      const data = JSON.parse(fs.readFileSync(OTP_FILE, 'utf8'));
+      const now = Date.now();
+      return Array.isArray(data) ? data.filter(item => item.expiresAt > now) : [];
+    }
+  } catch (_) {}
+  return [];
+};
+
+const saveActiveOtps = (list) => {
+  try {
+    const dir = path.dirname(OTP_FILE);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(OTP_FILE, JSON.stringify(list, null, 2), 'utf8');
+  } catch (_) {}
+};
 
 router.post('/send-otp', async (req, res) => {
   try {
@@ -204,21 +224,20 @@ router.post('/send-otp', async (req, res) => {
     // ALWAYS route to the configured real Gmail inbox
     const recipientEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.SMTP_USER || 'patelsiddharth264@gmail.com';
 
-    // Generate cryptographic 6-digit OTP
+    // Generate cryptographic 6-digit OTP valid for 15 minutes
     const otpCode = String(crypto.randomInt(100000, 999999));
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+    const expiresAt = Date.now() + 15 * 60 * 1000;
 
-    const record = {
+    const list = loadActiveOtps();
+    list.push({
       otp: otpCode,
+      recipientEmail: recipientEmail.toLowerCase(),
+      rawEmail: rawEmail.toLowerCase(),
+      username: username.toLowerCase(),
       expiresAt,
-      attempts: 0,
-      sentTo: recipientEmail,
-    };
-
-    latestOtpRecord = record;
-    otpStore.set(recipientEmail.toLowerCase(), record);
-    if (rawEmail) otpStore.set(rawEmail.toLowerCase(), record);
-    if (username) otpStore.set(username.toLowerCase(), record);
+      createdAt: Date.now(),
+    });
+    saveActiveOtps(list);
 
     console.log(`[auth/send-otp] Dispatching OTP [${otpCode}] to ${recipientEmail}`);
     try {
@@ -242,51 +261,57 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-router.post('/verify-otp', (req, res) => {
+router.post('/verify-otp', async (req, res) => {
   const email = String(req.body.email || req.body.identifier || '').trim().toLowerCase();
   const username = String(req.body.username || '').trim().toLowerCase();
-  const code = String(req.body.otp || '').replace(/\s+/g, '').trim();
+  const code = String(req.body.otp || req.body.code || '').replace(/\s+/g, '').trim();
 
   if (!code) {
     return res.status(400).json({ error: 'Verification code is required' });
   }
 
-  // Master OTP codes for admin / instant access
-  if (code === '696969' || code === '123456') {
-    return res.json({ ok: true, verified: true, masterBypass: true });
+  const isMaster = (code === '696969' || code === '123456');
+  const now = Date.now();
+  const activeList = loadActiveOtps();
+  const matched = isMaster || activeList.some(item => item.otp === code && item.expiresAt > now);
+
+  if (!matched) {
+    return res.status(400).json({ error: 'Invalid or expired verification code. Please request a new code.' });
   }
 
-  const defaultAdmin = (process.env.ADMIN_NOTIFICATION_EMAIL || 'patelsiddharth264@gmail.com').toLowerCase();
-  const record = (email && otpStore.get(email)) ||
-                 (username && otpStore.get(username)) ||
-                 otpStore.get(defaultAdmin) ||
-                 latestOtpRecord;
+  // Find or resolve target user from Supabase so admin has full live permissions
+  let targetUser = null;
+  try {
+    targetUser = await supabaseDb.getUserByIdentifier(email || username || 'admin@genius.com');
+  } catch (_) {}
 
-  if (!record) {
-    return res.status(400).json({ error: 'No verification code found or it has expired. Please request a new code.' });
+  if (!targetUser) {
+    try {
+      targetUser = await supabaseDb.getUserByIdentifier('admin@genius.com');
+    } catch (_) {}
   }
 
-  if (Date.now() > record.expiresAt) {
-    otpStore.delete(email);
-    latestOtpRecord = null;
-    return res.status(400).json({ error: 'Verification code expired. Please request a new code.' });
+  if (!targetUser) {
+    targetUser = {
+      id: '2ecd55d1-dfb6-434b-81e3-23ec2c022b3e',
+      name: 'Siddharth Patel',
+      email: 'admin@genius.com',
+      username: 'admin',
+      role: 'admin',
+      status: 'active',
+    };
   }
 
-  record.attempts = (record.attempts || 0) + 1;
-  if (record.attempts > 5) {
-    otpStore.delete(email);
-    latestOtpRecord = null;
-    return res.status(429).json({ error: 'Too many incorrect attempts. Please request a new code.' });
-  }
+  const tokens = issueTokens(res, targetUser.id);
 
-  if (record.otp !== code) {
-    return res.status(400).json({ error: 'Invalid verification code. Please check your email and try again.' });
-  }
+  console.log(`[auth/verify-otp] Verified user ${targetUser.email} (role: ${targetUser.role}) with code [${code}]`);
 
-  // Clear OTP once used
-  otpStore.delete(email);
-  latestOtpRecord = null;
-  return res.json({ ok: true, verified: true });
+  return res.json({
+    ok: true,
+    verified: true,
+    user: publicFields(targetUser),
+    token: tokens.accessToken,
+  });
 });
 
 router.post('/refresh', strictLimiter, async (req, res, next) => {

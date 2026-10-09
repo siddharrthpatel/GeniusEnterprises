@@ -482,12 +482,22 @@ async function getPortfolios() {
   return result;
 }
 
+async function getUserByIdentifier(ident) {
+  if (!ident) return null;
+  const s = String(ident).trim();
+  if (s.includes('@')) {
+    return await getUserByEmail(s);
+  }
+  return (await getUserByUsername(s)) || (await getUserById(s)) || (await getUserByEmail(s));
+}
+
 module.exports = {
   getAdminClient,
   resolveEmail,
   getUserById,
   getUserByEmail,
   getUserByUsername,
+  getUserByIdentifier,
   authenticateWithSupabase,
   getUsers,
   addUser,
