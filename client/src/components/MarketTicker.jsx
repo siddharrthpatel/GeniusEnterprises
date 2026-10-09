@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 function fmt(n) {
   if (n == null || Number.isNaN(Number(n))) return '—'

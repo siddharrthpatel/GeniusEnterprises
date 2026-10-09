@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useAuthStore } from '../store/auth'
 
 const LOCAL_PLATFORM_KEY = 'ge_local_platform'
