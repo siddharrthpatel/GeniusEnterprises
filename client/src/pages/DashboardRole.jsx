@@ -588,12 +588,24 @@ function AdminDashboard() {
     const load = async () => {
       try {
         const [uRes, pRes] = await Promise.all([
-          api.get('/users'),
+          api.get('/users').catch(() => null),
           api.get('/portfolio/admin-overview').catch(() => null)
         ])
-        if (uRes.data) setData(d => ({ ...d, users: uRes.data.users || uRes.data || [] }))
-        if (pRes?.data) setData(d => ({ ...d, ...pRes.data }))
-      } catch (e) {}
+        const rawUsers = uRes?.data?.users || (Array.isArray(uRes?.data) ? uRes.data : [])
+        const safeUsers = Array.isArray(rawUsers) ? rawUsers : []
+        const safeOverview = (pRes?.data && typeof pRes.data === 'object' && !Array.isArray(pRes.data)) ? pRes.data : {}
+
+        setData(d => ({
+          ...d,
+          ...safeOverview,
+          users: safeUsers,
+          portfolioDist: Array.isArray(safeOverview.portfolioDist) ? safeOverview.portfolioDist : (d.portfolioDist || []),
+          monthlyRevenue: Array.isArray(safeOverview.monthlyRevenue) ? safeOverview.monthlyRevenue : (d.monthlyRevenue || []),
+          roleWisePerformance: Array.isArray(safeOverview.roleWisePerformance) ? safeOverview.roleWisePerformance : (d.roleWisePerformance || [])
+        }))
+      } catch (e) {
+        console.warn('Admin dashboard load error:', e)
+      }
     }
     load()
   }, [])
@@ -797,7 +809,7 @@ function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {data.users.slice(0, 8).map((u) => (
+              {(Array.isArray(data?.users) ? data.users : []).slice(0, 8).map((u) => (
                 <tr key={u.id || u._id}>
                   <td>
                     <div className="user-cell">
@@ -814,7 +826,7 @@ function AdminDashboard() {
                   <td style={{ fontSize: '0.82rem', color: '#64748b' }}>{u.reportsToName || 'Admin Office'}</td>
                 </tr>
               ))}
-              {data.users.length === 0 && (
+              {(!Array.isArray(data?.users) || data.users.length === 0) && (
                 <tr>
                   <td colSpan="5" style={{ textAlign: 'center', padding: '1.5rem', color: '#64748b', fontSize: '0.85rem' }}>
                     No users loaded. Click "Manage Users" to view or create accounts.
