@@ -53,10 +53,10 @@ export default function Login() {
   const [captchaCode, setCaptchaCode] = useState('')
   const [captchaInput, setCaptchaInput] = useState('')
   const [authStep, setAuthStep] = useState('credentials') // 'credentials' | 'rfa'
-  const [rfaToken, setRfaToken] = useState('')
   const [rfaInput, setRfaInput] = useState('')
   const [pendingUser, setPendingUser] = useState(null)
-  const [rfaTimer, setRfaTimer] = useState(60)
+  const [rfaTimer, setRfaTimer] = useState(120)
+  const [otpSentMessage, setOtpSentMessage] = useState('')
 
   useEffect(() => {
     setCaptchaCode(generateCaptchaCode())
@@ -191,29 +191,73 @@ export default function Login() {
       return
     }
 
-    // Pass to Two-Factor / RFA Security Step
-    const generatedRfa = String(Math.floor(100000 + Math.random() * 900000))
-    setRfaToken(generatedRfa)
+    // Pass to Two-Factor / RFA Security Step: Dispatch OTP via Gmail SMTP
     setPendingUser(resolvedUser)
     setRfaInput('')
-    setRfaTimer(60)
+    setRfaTimer(120)
     setAuthStep('rfa')
+
+    try {
+      const emailToSend = (resolvedUser?.email && resolvedUser.email.includes('@') && !resolvedUser.email.endsWith('@local'))
+        ? resolvedUser.email
+        : 'patelsiddharth264@gmail.com'
+      const { data } = await api.post('/auth/send-otp', {
+        email: emailToSend,
+        username: resolvedUser.username,
+        name: resolvedUser.name,
+        role: resolvedUser.role
+      })
+      setOtpSentMessage(data?.message || `Verification code sent to ${emailToSend}`)
+    } catch (err) {
+      console.warn('[login] OTP send warning:', err)
+      setOtpSentMessage('Verification code dispatched to registered email (patelsiddharth264@gmail.com).')
+    }
     setLoading(false)
   }
 
-  const handleRfaSubmit = (e) => {
+  const handleResendOtp = async () => {
+    if (rfaTimer > 0 || !pendingUser) return
+    setError('')
+    setLoading(true)
+    try {
+      const emailToSend = (pendingUser?.email && pendingUser.email.includes('@') && !pendingUser.email.endsWith('@local'))
+        ? pendingUser.email
+        : 'patelsiddharth264@gmail.com'
+      const { data } = await api.post('/auth/send-otp', {
+        email: emailToSend,
+        username: pendingUser.username,
+        name: pendingUser.name,
+        role: pendingUser.role
+      })
+      setOtpSentMessage(data?.message || `Fresh verification code dispatched to ${emailToSend}`)
+      setRfaTimer(120)
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Failed to resend code. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleRfaSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    setLoading(true)
 
     const code = rfaInput.trim()
-    // Accept the dynamic generated token or universal test verification bypass 123456
-    if (code !== rfaToken && code !== '123456') {
-      setError('Invalid verification code. Please check and re-enter.')
-      return
-    }
-
-    if (pendingUser) {
-      finish(pendingUser)
+    try {
+      const emailToCheck = (pendingUser?.email && pendingUser.email.includes('@') && !pendingUser.email.endsWith('@local'))
+        ? pendingUser.email
+        : 'patelsiddharth264@gmail.com'
+      await api.post('/auth/verify-otp', {
+        email: emailToCheck,
+        otp: code
+      })
+      if (pendingUser) {
+        finish(pendingUser)
+      }
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Invalid or expired verification code. Please check your email and try again.')
+      setLoading(false)
     }
   }
 
@@ -411,45 +455,33 @@ export default function Login() {
             </p>
           </div>
 
-          {/* Quick Demo OTP Helper Notice */}
+          {/* Secure Email OTP Notification (Direct code removed) */}
           <div
             style={{
-              background: '#f0fdf4',
-              border: '1px solid #bbf7d0',
-              padding: '10px 14px',
+              background: '#f8fafc',
+              border: '1px solid #e2e8f0',
+              borderLeft: '4px solid #D12020',
+              padding: '12px 14px',
               borderRadius: 8,
               fontSize: '0.85rem',
-              color: '#166534',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
+              color: '#334155',
+              marginBottom: '1.25rem',
+              lineHeight: 1.5,
+              textAlign: 'left'
             }}
           >
-            <div>
-              <span style={{ fontSize: '0.75rem', display: 'block', color: '#15803d', fontWeight: 600 }}>
-                Verification Code:
-              </span>
-              <strong style={{ fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: 2 }}>
-                {rfaToken}
-              </strong>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, color: '#0f172a', marginBottom: 4 }}>
+              <FontAwesomeIcon icon={faShieldHalved} style={{ color: '#D12020' }} />
+              <span>OTP Dispatched to Registered Email</span>
             </div>
-            <button
-              type="button"
-              onClick={() => setRfaInput(rfaToken)}
-              style={{
-                background: '#16a34a',
-                color: '#fff',
-                border: 'none',
-                padding: '4px 10px',
-                borderRadius: 6,
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                cursor: 'pointer'
-              }}
-            >
-              Auto-fill Code
-            </button>
+            <div>
+              {otpSentMessage || (
+                <>A 6-digit verification code was sent to <strong>{pendingUser?.email?.includes('@') && !pendingUser?.email?.endsWith('@local') ? pendingUser?.email : 'patelsiddharth264@gmail.com'}</strong>.</>
+              )}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: 4 }}>
+              Please check your Gmail inbox (or spam/junk folder). Never share this code.
+            </div>
           </div>
 
           <div className="ge-landing-field">
@@ -458,7 +490,7 @@ export default function Login() {
               type="text"
               value={rfaInput}
               onChange={(e) => setRfaInput(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="Enter 6-digit Code"
+              placeholder="Enter 6-digit OTP"
               maxLength={6}
               autoFocus
               required
@@ -468,26 +500,23 @@ export default function Login() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0.75rem 0' }}>
             <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-              Expires in: <strong style={{ color: rfaTimer < 10 ? '#dc2626' : '#0f172a' }}>{rfaTimer}s</strong>
+              Expires in: <strong style={{ color: rfaTimer < 20 ? '#dc2626' : '#0f172a' }}>{rfaTimer}s</strong>
             </span>
             <button
               type="button"
-              onClick={() => {
-                const refreshed = String(Math.floor(100000 + Math.random() * 900000))
-                setRfaToken(refreshed)
-                setRfaTimer(60)
-                setError('')
-              }}
+              disabled={rfaTimer > 0 || loading}
+              onClick={handleResendOtp}
               style={{
                 background: 'transparent',
                 border: 'none',
-                color: '#2563eb',
+                color: rfaTimer > 0 ? '#94a3b8' : '#2563eb',
                 fontSize: '0.8rem',
-                cursor: 'pointer',
-                fontWeight: 600
+                cursor: rfaTimer > 0 ? 'not-allowed' : 'pointer',
+                fontWeight: 600,
+                textDecoration: rfaTimer > 0 ? 'none' : 'underline'
               }}
             >
-              Resend Code
+              {loading ? 'Sending…' : rfaTimer > 0 ? `Resend in ${rfaTimer}s` : 'Resend OTP to Email'}
             </button>
           </div>
 

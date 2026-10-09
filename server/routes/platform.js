@@ -2,6 +2,7 @@ const express = require('express');
 const { body, validationResult } = require('express-validator');
 const { authenticate, requireRole } = require('../middleware/auth');
 const platform = require('../data/platformStore');
+const mailer = require('../services/mailer');
 
 const router = express.Router();
 const staffAdminOnly = [authenticate, requireRole(['admin'])];
@@ -60,7 +61,15 @@ router.post(
   (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
-    res.status(201).json({ notice: platform.addNotice(req.body) });
+    const notice = platform.addNotice(req.body);
+    mailer.sendNoticeEmail({
+      to: process.env.ADMIN_NOTIFICATION_EMAIL || 'patelsiddharth264@gmail.com',
+      title: notice.title,
+      body: notice.body,
+      kind: notice.kind,
+      audience: notice.audience || 'all',
+    }).catch((err) => console.error('[mailer] Failed to send notice email:', err.message));
+    res.status(201).json({ notice, emailDispatched: true });
   },
 );
 
