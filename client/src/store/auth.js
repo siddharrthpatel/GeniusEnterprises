@@ -26,14 +26,32 @@ export const findLocalUser = (email, password) => {
   return rest
 }
 
+const safeGetDemoUser = () => {
+  try {
+    const raw = localStorage.getItem('demo_user')
+    if (!raw || raw === 'undefined' || raw === 'null') return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
 export const useAuthStore = create((set, get) => ({
-  user: JSON.parse(localStorage.getItem('demo_user')) || null,
+  user: safeGetDemoUser(),
   setUser: (user) => {
-    localStorage.setItem('demo_user', JSON.stringify(user))
-    set({ user })
+    try {
+      if (user) {
+        localStorage.setItem('demo_user', JSON.stringify(user))
+      } else {
+        localStorage.removeItem('demo_user')
+      }
+    } catch {}
+    set({ user: user || null })
   },
   logout: () => {
-    localStorage.removeItem('demo_user')
+    try {
+      localStorage.removeItem('demo_user')
+    } catch {}
     set({ user: null })
   },
   isAuthenticated: () => !!get().user,
@@ -42,8 +60,8 @@ export const useAuthStore = create((set, get) => ({
     return !!(u && (u.authSource === 'local' || String(u.id || '').startsWith('local-')))
   },
   loadMe: async () => {
-    const user = JSON.parse(localStorage.getItem('demo_user'))
-    if (user) set({ user })
+    const user = safeGetDemoUser()
+    set({ user })
     return user
   }
 }))

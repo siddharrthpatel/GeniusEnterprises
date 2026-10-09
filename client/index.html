@@ -13,6 +13,19 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <meta name="description" content="Genius Enterprises - Your trusted wealth management and investment support platform. SEBI Registered. Expert financial planning, equity, mutual funds, insurance, AIF, PMS, SIF." />
     <title>Genius Enterprises | Wealth Management &amp; Investment Support</title>
+    <script>
+      window.addEventListener('error', function(e) {
+        var r = document.getElementById('root');
+        if (r && !r.hasChildNodes()) {
+          r.innerHTML = '<div style="padding:24px;font-family:sans-serif;color:#D12020;background:#fff;margin:20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1)">' +
+            '<h3>Startup Error</h3>' +
+            '<p style="color:#333">' + (e.message || 'Script error') + '</p>' +
+            '<pre style="background:#f4f4f4;padding:10px;color:#c00">' + (e.filename ? (e.filename + ':' + e.lineno) : '') + '</pre>' +
+            '<button onclick="localStorage.clear();sessionStorage.clear();location.reload()" style="padding:8px 16px;background:#0B1C3B;color:#fff;border:none;border-radius:4px;cursor:pointer">Clear Storage &amp; Reload</button>' +
+            '</div>';
+        }
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
