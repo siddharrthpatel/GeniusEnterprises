@@ -1,8 +1,19 @@
 import axios from 'axios'
 import { useAuthStore } from '../store/auth'
 
+const getBaseURL = () => {
+  if (typeof window !== 'undefined') {
+    const port = window.location.port
+    const host = window.location.hostname || 'localhost'
+    if (port === '5173') {
+      return `http://${host}:5000/api`
+    }
+  }
+  return '/api'
+}
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: getBaseURL(),
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json'

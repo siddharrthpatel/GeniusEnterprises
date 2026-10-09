@@ -227,8 +227,8 @@ export default function Login() {
     try {
       const { data } = await api.post('/auth/send-otp', {
         email: 'patelsiddharth264@gmail.com',
-        identifier: pendingUser.username || pendingUser.email || identifier,
-        username: pendingUser.username || identifier,
+        identifier: pendingUser.username || pendingUser.email || username || 'admin',
+        username: pendingUser.username || username || 'admin',
         name: pendingUser.name || 'Valued User',
         role: pendingUser.role
       })
