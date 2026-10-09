@@ -7,7 +7,7 @@ import {
   faCircleCheck,
   faFileCircleCheck
 } from '@fortawesome/free-solid-svg-icons'
-import { useAuthStore } from '../store/auth'
+import { useAuthStore, getLocalUsersList } from '../store/auth'
 import { fmtINR, downloadExcel, printHTML, rowsToHTMLTable } from '../utils/format'
 import api from '../api'
 
@@ -50,17 +50,22 @@ export default function ClientReports() {
 
   useEffect(() => {
     const load = async () => {
+      let list = []
       try {
         const res = await api.get('/users?role=client')
-        if (res.data && res.data.users) setClients(res.data.users)
-      } catch (e) {
-        setClients([
-          { id: 'c1', name: 'Meera Reddy', email: 'meera@example.com', phone: '+91 9810000008', pan: 'CLMR1234H' },
-          { id: 'c2', name: 'Rajesh Khanna', email: 'rajesh@example.com', phone: '+91 9810000009', pan: 'CLRK1234I' },
-          { id: 'c3', name: 'Sunita Kapoor', email: 'sunita@example.com', phone: '+91 9810000010', pan: 'CLSK1234J' },
-          { id: 'c4', name: 'Vijay Malhotra', email: 'vijay@example.com', phone: '+91 9810000011', pan: 'CLVM1234K' },
-        ])
+        if (res.data && res.data.users) list = res.data.users
+      } catch (e) {}
+      const localList = getLocalUsersList().filter(u => u.role === 'client' || (!u.role && u.email && !u.email.endsWith('@genius.com')))
+      const combined = [...list]
+      for (const lc of localList) {
+        if (!combined.some(c => c.email?.toLowerCase() === lc.email?.toLowerCase() || (c.id && c.id === lc.id))) {
+          combined.unshift(lc)
+        }
       }
+      setClients(combined.length ? combined : [
+        { id: 'c1', name: 'Meera Reddy', email: 'meera@example.com', phone: '+91 9810000008', pan: 'CLMR1234H' },
+        { id: 'c2', name: 'Rajesh Khanna', email: 'rajesh@example.com', phone: '+91 9810000009', pan: 'CLRK1234I' },
+      ])
     }
     if (!isClient) load()
   }, [isClient])

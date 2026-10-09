@@ -605,8 +605,10 @@ async function getPortfolios() {
 async function getUserByIdentifier(ident) {
   if (!ident) return null;
   const s = String(ident).trim();
-  if (s.includes('@')) {
-    return await getUserByEmail(s);
+  const resolved = await resolveEmail(s);
+  if (resolved) {
+    const byEmail = await getUserByEmail(resolved);
+    if (byEmail) return byEmail;
   }
   return (await getUserByUsername(s)) || (await getUserById(s)) || (await getUserByEmail(s));
 }

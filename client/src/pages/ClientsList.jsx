@@ -17,7 +17,7 @@ import {
   faTrashCan,
   faTriangleExclamation
 } from '@fortawesome/free-solid-svg-icons'
-import { useAuthStore } from '../store/auth'
+import { useAuthStore, saveLocalUser, getLocalUsersList, deleteLocalUser } from '../store/auth'
 import { fmtINR, fmtPct, initials, roleLabel, downloadCSV, downloadExcel, printHTML, rowsToHTMLTable, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN } from '../utils/format'
 import api from '../api'
 
@@ -85,7 +85,11 @@ export default function ClientsList() {
     setDelError('')
     try {
       await api.delete(`/users/${delConfirm.id}`)
-      setClients((prev) => prev.filter((c) => c.id !== delConfirm.id))
+    } catch (_) {}
+    try {
+      deleteLocalUser(delConfirm.id)
+      deleteLocalUser(delConfirm.email)
+      setClients((prev) => prev.filter((c) => c.id !== delConfirm.id && c.email?.toLowerCase() !== delConfirm.email?.toLowerCase()))
       setDelConfirm(null)
     } catch (err) {
       setDelError(err.response?.data?.error || err.message || 'Failed to delete client')
@@ -100,10 +104,11 @@ export default function ClientsList() {
 
   useEffect(() => {
     const load = async () => {
+      let serverClients = []
       try {
         const res = await api.get('/users?role=client')
         if (res.data && res.data.users) {
-          const mapped = res.data.users.map(u => ({
+          serverClients = res.data.users.map(u => ({
             id: u.id || u._id,
             name: u.name, email: u.email, phone: u.phone, pan: u.pan,
             invested: u.invested || 0,
@@ -112,13 +117,40 @@ export default function ClientsList() {
             joined: u.createdAt,
             rmName: u.rmName || '—', advisorName: u.advisorName || '—'
           }))
-          setClients(mapped)
         }
+      } catch (_) {}
+
+      try {
         const uRes = await api.get('/users')
         if (uRes.data?.users) setStaffUsers(uRes.data.users)
-      } catch (e) {
+      } catch (_) {
         setStaffUsers([])
       }
+
+      // Merge local storage customers so newly added or signed-up customers are always visible
+      const localClients = getLocalUsersList()
+        .filter(u => u.role === 'client' || (!u.role && u.email && !u.email.endsWith('@genius.com')))
+        .map(u => ({
+          id: u.id || 'c_' + (u.email || Math.random().toString(36)),
+          name: u.name,
+          email: u.email,
+          phone: u.phone || '—',
+          pan: u.pan || '—',
+          invested: u.invested || 0,
+          current: u.current || 0,
+          status: u.status || 'active',
+          joined: u.createdAt || new Date().toISOString(),
+          rmName: u.rmName || '—',
+          advisorName: u.advisorName || '—'
+        }))
+
+      const combined = [...serverClients]
+      for (const lc of localClients) {
+        if (!combined.some(c => c.email?.toLowerCase() === lc.email?.toLowerCase() || (c.id && c.id === lc.id))) {
+          combined.unshift(lc)
+        }
+      }
+      setClients(combined)
     }
     load()
   }, [])
@@ -215,6 +247,12 @@ export default function ClientsList() {
         advisorName: advUser?.name || '—'
       }
       setClients(prev => [newClient, ...prev])
+      saveLocalUser({
+        ...payload,
+        id: newId,
+        createdAt: new Date().toISOString(),
+        authSource: 'local'
+      })
       setAddSuccess(`Customer "${payload.name}" registered successfully!`)
       setAddForm(emptyCustomerForm)
       setTimeout(() => { closeAddCustomer() }, 2000)

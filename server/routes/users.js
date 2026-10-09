@@ -51,7 +51,7 @@ router.get(
 router.post(
   '/',
   authenticate,
-  requireRole(['admin']),
+  requireRole(['admin', 'branch_manager', 'rm', 'arm', 'advisor', 'sub_broker', 'employee']),
   [
     body('name').isString().trim().isLength({ min: 2, max: 80 }),
     body('email').isEmail().normalizeEmail({ gmail_remove_dots: false }).isLength({ max: 255 }),

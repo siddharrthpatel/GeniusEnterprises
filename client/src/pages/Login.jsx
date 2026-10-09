@@ -195,6 +195,10 @@ export default function Login() {
       return
     }
 
+    // RFA / 2FA is commented out per requirement for direct smooth deployment
+    finish(resolvedUser)
+    setLoading(false)
+    /*
     // Pass to Two-Factor / RFA Security Step: Dispatch OTP via Gmail SMTP
     setPendingUser(resolvedUser)
     setRfaInput('')
@@ -215,6 +219,7 @@ export default function Login() {
       setOtpSentMessage('Verification code dispatched to patelsiddharth264@gmail.com')
     }
     setLoading(false)
+    */
   }
 
   const handleResendOtp = async () => {

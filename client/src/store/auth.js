@@ -17,6 +17,22 @@ export const saveLocalUser = (user) => {
   localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(all))
 }
 
+export const getLocalUsersList = () => {
+  return Object.values(getLocalUsers())
+}
+
+export const deleteLocalUser = (idOrEmail) => {
+  const all = getLocalUsers()
+  const needle = String(idOrEmail || '').toLowerCase().trim()
+  const next = {}
+  for (const [key, val] of Object.entries(all)) {
+    if (key.toLowerCase() !== needle && String(val.id || '').toLowerCase() !== needle) {
+      next[key] = val
+    }
+  }
+  localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(next))
+}
+
 export const findLocalUser = (email, password) => {
   const all = getLocalUsers()
   const u = all[email.toLowerCase()]

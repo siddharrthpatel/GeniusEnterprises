@@ -15,7 +15,7 @@ import {
   faCheck,
   faArrowsRotate
 } from '@fortawesome/free-solid-svg-icons'
-import { useAuthStore, saveLocalUser } from '../store/auth'
+import { useAuthStore, saveLocalUser, getLocalUsersList, deleteLocalUser } from '../store/auth'
 import { initials, roleBadgeClass, roleLabel, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN } from '../utils/format'
 import api from '../api'
 
@@ -159,15 +159,29 @@ export default function AdminUsers() {
 
   useEffect(() => {
     const load = async () => {
+      let serverUsers = []
       try {
         const res = await api.get('/users')
         if (res.data && res.data.users) {
-          setUsers(res.data.users.map(u => ({
+          serverUsers = res.data.users.map(u => ({
             id: u.id || u._id,
             ...u
-          })))
+          }))
         }
-      } catch (e) {}
+      } catch (_) {}
+
+      const localList = getLocalUsersList().map(u => ({
+        id: u.id || 'u_' + (u.email || Math.random().toString(36)),
+        ...u
+      }))
+
+      const combined = [...serverUsers]
+      for (const lu of localList) {
+        if (!combined.some(u => u.email?.toLowerCase() === lu.email?.toLowerCase() || (u.id && u.id === lu.id))) {
+          combined.push(lu)
+        }
+      }
+      setUsers(combined)
     }
     load()
   }, [])
@@ -218,6 +232,7 @@ export default function AdminUsers() {
         try {
           await api.put(`/users/${editing}`, payload)
         } catch (e) {}
+        saveLocalUser({ ...payload, id: editing })
         setUsers(prev => prev.map(u => u.id === editing ? { ...u, ...payload, password: undefined } : u))
       } else {
         let newId = 'u' + (Date.now())
@@ -225,6 +240,7 @@ export default function AdminUsers() {
           const res = await api.post('/users', payload)
           if (res.data && res.data.user) newId = res.data.user.id || res.data.user._id
         } catch (e) {}
+        saveLocalUser({ ...payload, id: newId, createdAt: new Date().toISOString() })
         setUsers(prev => [...prev, { id: newId, ...payload, password: undefined, createdAt: new Date().toISOString() }])
       }
       closeModal()
@@ -236,7 +252,9 @@ export default function AdminUsers() {
   const confirmDelete = async () => {
     if (!delConfirm) return
     try { await api.delete(`/users/${delConfirm.id}`) } catch (e) {}
-    setUsers(prev => prev.filter(u => u.id !== delConfirm.id))
+    deleteLocalUser(delConfirm.id)
+    deleteLocalUser(delConfirm.email)
+    setUsers(prev => prev.filter(u => u.id !== delConfirm.id && u.email?.toLowerCase() !== delConfirm.email?.toLowerCase()))
     setDelConfirm(null)
   }
 

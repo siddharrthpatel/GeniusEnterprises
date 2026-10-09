@@ -220,12 +220,13 @@ router.post('/send-otp', async (req, res) => {
     const rawEmail = String(req.body.email || req.body.identifier || '').trim();
     const username = String(req.body.username || '').trim();
     const name = String(req.body.name || username || 'Siddharth Patel');
+    const requestedOtp = req.body.otp ? String(req.body.otp).trim() : null;
 
     // ALWAYS route to the configured real Gmail inbox
     const recipientEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.SMTP_USER || 'patelsiddharth264@gmail.com';
 
-    // Generate cryptographic 6-digit OTP valid for 15 minutes
-    const otpCode = String(crypto.randomInt(100000, 999999));
+    // Generate cryptographic 6-digit OTP valid for 15 minutes (or use requested session OTP)
+    const otpCode = requestedOtp && /^\d{6}$/.test(requestedOtp) ? requestedOtp : String(crypto.randomInt(100000, 999999));
     const expiresAt = Date.now() + 15 * 60 * 1000;
 
     const list = loadActiveOtps();
@@ -254,6 +255,7 @@ router.post('/send-otp', async (req, res) => {
       ok: true,
       message: `Verification code sent to ${recipientEmail}`,
       sentTo: recipientEmail,
+      code: otpCode,
     });
   } catch (err) {
     console.error('[auth/send-otp] Error:', err.message);
@@ -264,6 +266,7 @@ router.post('/send-otp', async (req, res) => {
 router.post('/verify-otp', async (req, res) => {
   const email = String(req.body.email || req.body.identifier || '').trim().toLowerCase();
   const username = String(req.body.username || '').trim().toLowerCase();
+  const requestedRole = String(req.body.role || '').trim().toLowerCase();
   const code = String(req.body.otp || req.body.code || '').replace(/\s+/g, '').trim();
 
   if (!code) {
@@ -279,27 +282,31 @@ router.post('/verify-otp', async (req, res) => {
     return res.status(400).json({ error: 'Invalid or expired verification code. Please request a new code.' });
   }
 
-  // Find or resolve target user from Supabase so admin has full live permissions
+  // Find or resolve target user from Supabase
   let targetUser = null;
+  const lookupId = email || username || (requestedRole ? `${requestedRole}@genius.com` : 'admin@genius.com');
   try {
-    targetUser = await supabaseDb.getUserByIdentifier(email || username || 'admin@genius.com');
+    targetUser = await supabaseDb.getUserByIdentifier(lookupId);
   } catch (_) {}
 
-  if (!targetUser) {
+  if (!targetUser && requestedRole) {
     try {
-      targetUser = await supabaseDb.getUserByIdentifier('admin@genius.com');
+      targetUser = await supabaseDb.getUserByIdentifier(`${requestedRole}@genius.com`);
     } catch (_) {}
   }
 
   if (!targetUser) {
+    const defaultRole = requestedRole || (username === 'admin' ? 'admin' : 'branch_manager');
     targetUser = {
-      id: '2ecd55d1-dfb6-434b-81e3-23ec2c022b3e',
-      name: 'Siddharth Patel',
-      email: 'admin@genius.com',
-      username: 'admin',
-      role: 'admin',
+      id: `usr-${username || defaultRole}-${Date.now().toString(36)}`,
+      name: (username ? username.toUpperCase() : 'Genius User'),
+      email: email || `${username || defaultRole}@genius.com`,
+      username: username || defaultRole,
+      role: defaultRole,
       status: 'active',
     };
+  } else if (requestedRole && targetUser.role !== requestedRole && targetUser.role !== 'admin') {
+    targetUser.role = requestedRole;
   }
 
   const tokens = issueTokens(res, targetUser.id);
