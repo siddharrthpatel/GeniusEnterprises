@@ -2,6 +2,9 @@ import axios from 'axios'
 import { useAuthStore } from '../store/auth'
 
 const getBaseURL = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL
+  }
   if (typeof window !== 'undefined') {
     const port = window.location.port
     const host = window.location.hostname || 'localhost'
