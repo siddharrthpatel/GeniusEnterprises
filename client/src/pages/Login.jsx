@@ -9,7 +9,9 @@ import {
   faShieldHalved,
   faArrowsRotate,
   faKey,
-  faCheck
+  faCheck,
+  faEye,
+  faEyeSlash
 } from '@fortawesome/free-solid-svg-icons'
 import api from '../api'
 import { useAuthStore, findLocalUser } from '../store/auth'
@@ -40,6 +42,7 @@ export default function Login() {
   const [role, setRole] = useState('client')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [forgotHint, setForgotHint] = useState(false)
@@ -378,16 +381,36 @@ export default function Login() {
             />
           </div>
 
-          <div className="ge-landing-field">
+          <div className="ge-landing-field" style={{ position: 'relative' }}>
             <div className="ge-landing-ico"><FontAwesomeIcon icon={faLock} /></div>
             <input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               autoComplete="new-password"
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              title={showPassword ? 'Hide password' : 'Show password'}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: '0 1.1rem',
+                color: showPassword ? '#D12020' : '#64748b',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.95rem',
+                transition: 'color 0.18s ease'
+              }}
+            >
+              <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+            </button>
           </div>
 
           {/* Interactive Security Captcha Box */}
