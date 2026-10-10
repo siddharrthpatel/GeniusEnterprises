@@ -15,20 +15,20 @@ const mockHoldings = [
   ['Nifty 50 Index Fund - Direct Growth', 'INF100K0123', 1500000, 1785000, 31.6, 19.0],
   ['Axis Bluechip Fund', 'INF207K0124', 800000, 920000, 16.3, 15.0],
   ['SBI Small Cap Fund', 'INF320K0125', 500000, 560000, 9.9, 12.0],
-  ['HDFC Mid-Cap Opportunities', 'INF105K0126', 700000, 805000, 14.2, 15.0],
-  ['LIC Jeevan Labh Policy', 'LIC-12345', 600000, 650000, 11.5, 8.3],
-  ['PPF Account - 15 Yr', 'PPF-99887', 500000, 570000, 10.1, 14.0],
-  ['SBI Savings Account', 'SB-100234', 200000, 200000, 3.5, 3.5],
-  ['Apollo Family Health Plan', 'APOLLO-123', 100000, 100000, 1.8, 0.0],
+  ['HDFC Mid-Cap Opportunities Fund', 'INF105K0126', 700000, 805000, 14.2, 15.0],
+  ['Reliance Industries Ltd', 'INE002A01018', 600000, 680000, 12.1, 13.3],
+  ['Tata Consultancy Services (TCS)', 'INE467B01029', 500000, 570000, 10.1, 14.0],
+  ['Infosys Ltd', 'INE009A01021', 200000, 225000, 4.0, 12.5],
+  ['ICICI Bank Ltd', 'INE090A01021', 100000, 115000, 2.0, 15.0],
 ]
 const mockTransactions = [
   ['2026-08-05', 'Purchase', 'Nifty 50 Index Fund', 50000, 1250, 40.00],
   ['2026-07-28', 'SIP', 'Axis Bluechip Fund', 10000, 250, 40.00],
   ['2026-07-20', 'SIP', 'SBI Small Cap Fund', 10000, 200, 50.00],
-  ['2026-07-10', 'Dividend', 'HDFC Mid-Cap Opportunities', 4300, null, null],
-  ['2026-06-25', 'Purchase', 'PPF Account', 100000, null, null],
-  ['2026-06-05', 'Redemption', 'SBI Savings A/c', -25000, null, null],
-  ['2026-05-20', 'Premium', 'LIC Jeevan Labh', 60000, null, null],
+  ['2026-07-10', 'Dividend', 'HDFC Mid-Cap Opportunities Fund', 4300, null, null],
+  ['2026-06-25', 'Buy', 'Reliance Industries Ltd', 100000, 34, 2940.00],
+  ['2026-06-05', 'Buy', 'Tata Consultancy Services', 25000, 6, 3850.00],
+  ['2026-05-20', 'SIP', 'SBI Small Cap Fund', 10000, 200, 50.00],
 ]
 
 export default function ClientReports() {

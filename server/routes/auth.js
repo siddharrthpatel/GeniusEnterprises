@@ -219,34 +219,66 @@ router.post('/send-otp', async (req, res) => {
   try {
     const rawEmail = String(req.body.email || req.body.identifier || '').trim();
     const username = String(req.body.username || '').trim();
-    const name = String(req.body.name || username || 'Siddharth Patel');
+    let name = String(req.body.name || '').trim();
     const requestedOtp = req.body.otp ? String(req.body.otp).trim() : null;
 
-    // ALWAYS route to the configured real Gmail inbox
-    const recipientEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.SMTP_USER || 'patelsiddharth264@gmail.com';
+    // Check if an email is a deliverable address
+    const isDeliverableEmail = (addr) => {
+      if (!addr || typeof addr !== 'string') return false;
+      const clean = addr.trim().toLowerCase();
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean) && !clean.endsWith('@local');
+    };
 
-    // Generate cryptographic 6-digit OTP valid for 15 minutes (or use requested session OTP)
+    let recipientEmail = '';
+
+    // 1. If explicit deliverable email passed
+    if (isDeliverableEmail(rawEmail)) {
+      recipientEmail = rawEmail.trim().toLowerCase();
+    }
+
+    // 2. If not found or internal demo domain (@genius.com), lookup database / custom user profile
+    if (!recipientEmail || recipientEmail.endsWith('@genius.com')) {
+      try {
+        const found = await supabaseDb.getUserByIdentifier(rawEmail || username);
+        if (found) {
+          if (!name && found.name) name = found.name;
+          if (isDeliverableEmail(found.email) && !found.email.toLowerCase().endsWith('@genius.com')) {
+            recipientEmail = found.email.trim().toLowerCase();
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 3. Fallback to administrator/configured notification inbox if recipient has no external email address
+    if (!recipientEmail || recipientEmail.endsWith('@genius.com')) {
+      recipientEmail = (process.env.ADMIN_NOTIFICATION_EMAIL || process.env.SMTP_USER || 'patelsiddharth264@gmail.com').trim().toLowerCase();
+    }
+
+    // Generate cryptographic 6-digit OTP valid for 10 minutes (or use requested session OTP)
     const otpCode = requestedOtp && /^\d{6}$/.test(requestedOtp) ? requestedOtp : String(crypto.randomInt(100000, 999999));
-    const expiresAt = Date.now() + 15 * 60 * 1000;
+    const expiresAt = Date.now() + 10 * 60 * 1000;
 
-    const list = loadActiveOtps();
+    const now = Date.now();
+    const list = loadActiveOtps().filter(item => item.expiresAt > now && item.recipientEmail !== recipientEmail);
     list.push({
       otp: otpCode,
-      recipientEmail: recipientEmail.toLowerCase(),
+      recipientEmail,
       rawEmail: rawEmail.toLowerCase(),
       username: username.toLowerCase(),
       expiresAt,
-      createdAt: Date.now(),
+      createdAt: now,
     });
     saveActiveOtps(list);
 
-    console.log(`[auth/send-otp] Dispatching OTP [${otpCode}] to ${recipientEmail}`);
+    console.log(`[auth/send-otp] Dispatching priority OTP [${otpCode}] to ${recipientEmail}`);
+    let emailSent = false;
     try {
       await mailer.sendOtpEmail({
         to: recipientEmail,
         otp: otpCode,
-        userName: name,
+        userName: name || username || 'Valued User',
       });
+      emailSent = true;
     } catch (sendErr) {
       console.warn('[auth/send-otp] Email delivery warning:', sendErr.message);
     }
@@ -255,7 +287,8 @@ router.post('/send-otp', async (req, res) => {
       ok: true,
       message: `Verification code sent to ${recipientEmail}`,
       sentTo: recipientEmail,
-      code: otpCode,
+      emailSent,
+      expiresIn: 600,
     });
   } catch (err) {
     console.error('[auth/send-otp] Error:', err.message);
@@ -280,6 +313,11 @@ router.post('/verify-otp', async (req, res) => {
 
   if (!matched) {
     return res.status(400).json({ error: 'Invalid or expired verification code. Please request a new code.' });
+  }
+
+  // Invalidate single-use OTP
+  if (!isMaster) {
+    saveActiveOtps(activeList.filter(item => item.otp !== code));
   }
 
   // Find or resolve target user from Supabase

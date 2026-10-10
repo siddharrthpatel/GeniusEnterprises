@@ -566,8 +566,8 @@ export default function MasterAdmin({ mode = 'full' }) {
     <div className={'ge-master' + (showHero ? '' : ' ge-master-embedded')}>
       {showHero && (
         <div className="ge-master-hero">
-          <h2><FontAwesomeIcon icon={faShieldHalved} style={{ color: '#F39C12' }} /> Platform Controls</h2>
-          <p>Rotate project keys, switch role dashboards on or off, and publish notices or ads.</p>
+          <h2 style={{ color: '#ffffff' }}><FontAwesomeIcon icon={faShieldHalved} style={{ color: '#F39C12' }} /> Platform Controls</h2>
+          <p style={{ color: 'rgba(255, 255, 255, 0.9)' }}>Rotate project keys, switch role dashboards on or off, and publish notices or ads.</p>
         </div>
       )}
       {msg && <div className="ge-master-msg">{msg}</div>}
@@ -575,7 +575,24 @@ export default function MasterAdmin({ mode = 'full' }) {
       <div className={'ge-master-grid' + (showKeys ? '' : ' ge-master-grid-single')}>
         {showKeys && (
           <section className="ge-master-card">
-            <h3><FontAwesomeIcon icon={faKey} /> Project & market keys</h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <h3 style={{ margin: 0 }}><FontAwesomeIcon icon={faKey} /> Project & market keys</h3>
+              <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a', fontSize: '0.72rem', fontWeight: 700 }}>
+                ● Active Keys
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.5rem', marginBottom: '0.85rem' }}>
+              <div style={{ padding: '0.45rem 0.65rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700 }}>DATABASE</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#16a34a' }}>Supabase Connected</div>
+              </div>
+              <div style={{ padding: '0.45rem 0.65rem', borderRadius: '8px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700 }}>AI / MARKET ENGINE</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0B1C3B' }}>Yahoo + Gemini</div>
+              </div>
+            </div>
+
             <form onSubmit={saveKeys} className="ge-master-form">
               <label>Supabase URL
                 <input value={keys.supabase_url} onChange={(e) => setKeys({ ...keys, supabase_url: e.target.value })} placeholder="https://xxxx.supabase.co" />
@@ -593,8 +610,11 @@ export default function MasterAdmin({ mode = 'full' }) {
         )}
 
         <section className="ge-master-card">
-          <h3><FontAwesomeIcon icon={faToggleOn} /> Dashboards <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Activate / Deactivate role portals</span></h3>
-          <div className="ge-master-toggles">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h3 style={{ margin: 0 }}><FontAwesomeIcon icon={faToggleOn} /> Dashboards</h3>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Activate / Deactivate role portals</span>
+          </div>
+          <div className="ge-master-toggles" style={{ maxHeight: 'none' }}>
             {loading && dashboards.length === 0 && (
               <div className="ge-toggle-empty">Loading dashboard configuration…</div>
             )}
@@ -826,154 +846,157 @@ export default function MasterAdmin({ mode = 'full' }) {
         </div>
       </section>
 
-      {/* ── API Access Control ── */}
-      <section className="ge-master-card ge-api-access-card">
-        <h3><FontAwesomeIcon icon={faDatabase} /> API Data Access Control <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Define what data each role can read or write</span></h3>
+      {/* ── Row 3: API Access & Notices (2 balanced columns) ── */}
+      <div className="ge-master-grid">
+        {/* ── API Access Control ── */}
+        <section className="ge-master-card ge-api-access-card">
+          <h3><FontAwesomeIcon icon={faDatabase} /> API Data Access Control <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Define what data each role can read or write</span></h3>
 
-        <div className="ge-api-role-tabs">
-          {ROLES_FOR_ACCESS.map(r => (
-            <button
-              key={r}
-              type="button"
-              className={'ge-api-role-tab' + (selectedAccessRole === r ? ' active' : '')}
-              onClick={() => setSelectedAccessRole(r)}
-            >
-              {r.replace(/_/g, ' ')}
+          <div className="ge-api-role-tabs">
+            {ROLES_FOR_ACCESS.map(r => (
+              <button
+                key={r}
+                type="button"
+                className={'ge-api-role-tab' + (selectedAccessRole === r ? ' active' : '')}
+                onClick={() => setSelectedAccessRole(r)}
+              >
+                {r.replace(/_/g, ' ')}
+              </button>
+            ))}
+          </div>
+
+          {accessMsg && <div className="ge-api-access-msg">{accessMsg}</div>}
+
+          <div className="ge-api-scopes-grid">
+            {DATA_SCOPES.map(scope => {
+              const perms = apiAccess[selectedAccessRole]?.[scope.id] || { read: false, write: false }
+              return (
+                <div key={scope.id} className="ge-api-scope-row">
+                  <div className="ge-api-scope-info">
+                    <span className="ge-api-scope-label">{scope.label}</span>
+                    <small className="ge-api-scope-desc">{scope.description}</small>
+                  </div>
+                  <div className="ge-api-scope-perms">
+                    <button
+                      type="button"
+                      className={'ge-api-perm-btn' + (perms.read ? ' on' : '')}
+                      onClick={() => toggleScope(selectedAccessRole, scope.id, 'read')}
+                      title={perms.read ? 'Disable Read' : 'Enable Read'}
+                    >
+                      <FontAwesomeIcon icon={perms.read ? faCheck : faXmark} />
+                      <span>Read</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={'ge-api-perm-btn write' + (perms.write ? ' on' : '')}
+                      onClick={() => toggleScope(selectedAccessRole, scope.id, 'write')}
+                      title={perms.write ? 'Disable Write' : 'Enable Write'}
+                    >
+                      <FontAwesomeIcon icon={perms.write ? faCheck : faXmark} />
+                      <span>Write</span>
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div style={{ marginTop: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button type="button" className="ge-gold-submit" style={{ maxWidth: 220 }} onClick={saveApiAccess}>
+              <FontAwesomeIcon icon={faFloppyDisk} /> Save Access Rules
             </button>
-          ))}
-        </div>
-
-        {accessMsg && <div className="ge-api-access-msg">{accessMsg}</div>}
-
-        <div className="ge-api-scopes-grid">
-          {DATA_SCOPES.map(scope => {
-            const perms = apiAccess[selectedAccessRole]?.[scope.id] || { read: false, write: false }
-            return (
-              <div key={scope.id} className="ge-api-scope-row">
-                <div className="ge-api-scope-info">
-                  <span className="ge-api-scope-label">{scope.label}</span>
-                  <small className="ge-api-scope-desc">{scope.description}</small>
-                </div>
-                <div className="ge-api-scope-perms">
-                  <button
-                    type="button"
-                    className={'ge-api-perm-btn' + (perms.read ? ' on' : '')}
-                    onClick={() => toggleScope(selectedAccessRole, scope.id, 'read')}
-                    title={perms.read ? 'Disable Read' : 'Enable Read'}
-                  >
-                    <FontAwesomeIcon icon={perms.read ? faCheck : faXmark} />
-                    <span>Read</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={'ge-api-perm-btn write' + (perms.write ? ' on' : '')}
-                    onClick={() => toggleScope(selectedAccessRole, scope.id, 'write')}
-                    title={perms.write ? 'Disable Write' : 'Enable Write'}
-                  >
-                    <FontAwesomeIcon icon={perms.write ? faCheck : faXmark} />
-                    <span>Write</span>
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        <div style={{ marginTop: '1.25rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <button type="button" className="ge-gold-submit" style={{ maxWidth: 220 }} onClick={saveApiAccess}>
-            <FontAwesomeIcon icon={faFloppyDisk} /> Save Access Rules
-          </button>
-          <button
-            type="button"
-            className="btn btn-sm btn-outline"
-            onClick={() => {
-              setApiAccess(prev => ({
-                ...prev,
-                [selectedAccessRole]: Object.fromEntries(DATA_SCOPES.map(s => [s.id, { read: true, write: false }]))
-              }))
-            }}
-          >
-            Grant All Read
-          </button>
-          <button
-            type="button"
-            className="btn btn-sm btn-outline"
-            onClick={() => {
-              setApiAccess(prev => ({
-                ...prev,
-                [selectedAccessRole]: Object.fromEntries(DATA_SCOPES.map(s => [s.id, { read: false, write: false }]))
-              }))
-            }}
-          >
-            Revoke All
-          </button>
-        </div>
-
-        <p className="ge-master-note" style={{ marginTop: '0.85rem' }}>These rules control what data each user role may request via the server API. Changes take effect immediately after saving.</p>
-      </section>
-
-      <section className="ge-master-card">
-        <h3><FontAwesomeIcon icon={faBullhorn} /> Ads & notices <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Publish role-wide announcements</span></h3>
-        <form onSubmit={postNotice} className="ge-master-form ge-master-notice-form">
-          <div className="ge-notice-row ge-notice-row-split">
-            <label className="ge-notice-field">
-              <span>Type</span>
-              <select value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value })}>
-                <option value="notice">Notice</option>
-                <option value="ad">Ad</option>
-              </select>
-            </label>
-            <label className="ge-notice-field">
-              <span>Audience</span>
-              <select value={draft.audience} onChange={(e) => setDraft({ ...draft, audience: e.target.value })}>
-                <option value="all">All roles</option>
-                <option value="client">Clients</option>
-                <option value="employee">Employees</option>
-                <option value="rm">RMs</option>
-                <option value="advisor">Advisors</option>
-              </select>
-            </label>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline"
+              onClick={() => {
+                setApiAccess(prev => ({
+                  ...prev,
+                  [selectedAccessRole]: Object.fromEntries(DATA_SCOPES.map(s => [s.id, { read: true, write: false }]))
+                }))
+              }}
+            >
+              Grant All Read
+            </button>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline"
+              onClick={() => {
+                setApiAccess(prev => ({
+                  ...prev,
+                  [selectedAccessRole]: Object.fromEntries(DATA_SCOPES.map(s => [s.id, { read: false, write: false }]))
+                }))
+              }}
+            >
+              Revoke All
+            </button>
           </div>
-          <label className="ge-notice-field ge-notice-row-full">
-            <span>Title</span>
-            <input required placeholder="Short title for this notice or ad" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
-          </label>
-          <label className="ge-notice-field ge-notice-row-full">
-            <span>Message</span>
-            <textarea rows={4} placeholder="Body / description of the notice. Markdown not supported." value={draft.body} onChange={(e) => setDraft({ ...draft, body: e.target.value })} />
-          </label>
-          <div className="ge-notice-row ge-notice-actions">
-            <button type="submit" className="ge-gold-submit"><FontAwesomeIcon icon={faPlus} /> Publish</button>
-          </div>
-        </form>
-        <div className="ge-master-notice-list">
-          {notices.length === 0 && (
-            <div className="ge-toggle-empty">No notices published yet. Create one above.</div>
-          )}
-          {notices.map((n) => (
-            <div key={n.id} className={'ge-master-notice-row' + (n.isActive ? '' : ' inactive')}>
-              <div>
-                <strong>{n.title}</strong>
-                {n.body && <p>{n.body}</p>}
-                <div>
-                  <small className={'notice-badge ' + n.kind}>{n.kind === 'ad' ? 'Ad' : 'Notice'}</small>
-                  <small>Audience: {n.audience === 'all' ? 'All roles' : n.audience}</small>
-                  {n.createdAt && <small>Posted: {new Date(n.createdAt).toLocaleDateString()}</small>}
-                </div>
-              </div>
-              <div className="notice-actions">
-                <button type="button" className="btn btn-sm btn-ghost" onClick={() => toggleNotice(n)} title={n.isActive ? 'Hide from audience' : 'Show to audience'}>
-                  <FontAwesomeIcon icon={n.isActive ? faEye : faEyeSlash} />
-                  <span>{n.isActive ? 'Hide' : 'Show'}</span>
-                </button>
-                <button type="button" className="btn btn-sm btn-danger-ghost" onClick={() => deleteNotice(n.id)} title="Delete permanently">
-                  <FontAwesomeIcon icon={faTrashCan} />
-                </button>
-              </div>
+
+          <p className="ge-master-note" style={{ marginTop: '0.85rem' }}>These rules control what data each user role may request via the server API. Changes take effect immediately after saving.</p>
+        </section>
+
+        <section className="ge-master-card">
+          <h3><FontAwesomeIcon icon={faBullhorn} /> Ads & notices <span style={{ marginLeft: 'auto', fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>Publish role-wide announcements</span></h3>
+          <form onSubmit={postNotice} className="ge-master-form ge-master-notice-form">
+            <div className="ge-notice-row ge-notice-row-split">
+              <label className="ge-notice-field">
+                <span>Type</span>
+                <select value={draft.kind} onChange={(e) => setDraft({ ...draft, kind: e.target.value })}>
+                  <option value="notice">Notice</option>
+                  <option value="ad">Ad</option>
+                </select>
+              </label>
+              <label className="ge-notice-field">
+                <span>Audience</span>
+                <select value={draft.audience} onChange={(e) => setDraft({ ...draft, audience: e.target.value })}>
+                  <option value="all">All roles</option>
+                  <option value="client">Clients</option>
+                  <option value="employee">Employees</option>
+                  <option value="rm">RMs</option>
+                  <option value="advisor">Advisors</option>
+                </select>
+              </label>
             </div>
-          ))}
-        </div>
-      </section>
+            <label className="ge-notice-field ge-notice-row-full">
+              <span>Title</span>
+              <input required placeholder="Short title for this notice or ad" value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
+            </label>
+            <label className="ge-notice-field ge-notice-row-full">
+              <span>Message</span>
+              <textarea rows={4} placeholder="Body / description of the notice. Markdown not supported." value={draft.body} onChange={(e) => setDraft({ ...draft, body: e.target.value })} />
+            </label>
+            <div className="ge-notice-row ge-notice-actions">
+              <button type="submit" className="ge-gold-submit"><FontAwesomeIcon icon={faPlus} /> Publish</button>
+            </div>
+          </form>
+          <div className="ge-master-notice-list">
+            {notices.length === 0 && (
+              <div className="ge-toggle-empty">No notices published yet. Create one above.</div>
+            )}
+            {notices.map((n) => (
+              <div key={n.id} className={'ge-master-notice-row' + (n.isActive ? '' : ' inactive')}>
+                <div>
+                  <strong>{n.title}</strong>
+                  {n.body && <p>{n.body}</p>}
+                  <div>
+                    <small className={'notice-badge ' + n.kind}>{n.kind === 'ad' ? 'Ad' : 'Notice'}</small>
+                    <small>Audience: {n.audience === 'all' ? 'All roles' : n.audience}</small>
+                    {n.createdAt && <small>Posted: {new Date(n.createdAt).toLocaleDateString()}</small>}
+                  </div>
+                </div>
+                <div className="notice-actions">
+                  <button type="button" className="btn btn-sm btn-ghost" onClick={() => toggleNotice(n)} title={n.isActive ? 'Hide from audience' : 'Show to audience'}>
+                    <FontAwesomeIcon icon={n.isActive ? faEye : faEyeSlash} />
+                    <span>{n.isActive ? 'Hide' : 'Show'}</span>
+                  </button>
+                  <button type="button" className="btn btn-sm btn-danger-ghost" onClick={() => deleteNotice(n.id)} title="Delete permanently">
+                    <FontAwesomeIcon icon={faTrashCan} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
     </div>
   )
 }

@@ -647,107 +647,24 @@ function AdminDashboard() {
     load()
   }, [])
 
-  const orgWorkflow = [
-    { title: 'Lead Generation', subtitle: 'Advisors source new clients', status: 'done' },
-    { title: 'Product Counseling', subtitle: 'RM & Advisors pitch products', status: 'done' },
-    { title: 'Sales Closure', subtitle: 'Policy / SIP / Loan activation', status: 'active' },
-    { title: 'KYC & Onboarding', subtitle: 'Docs verification & approval', status: 'active' },
-    { title: 'Commission Payout', subtitle: 'Revenue share with all stakeholders', status: 'pending' }
-  ]
-
-  const crossRoleWorkflow = [
-    { title: 'Client at Branch', subtitle: 'Customer walks in Genius Branch', status: 'done' },
-    { title: 'Employee Opens A/c', subtitle: 'Aadhaar + PAN + Account Open', status: 'done' },
-    { title: 'RM Suggests Plan', subtitle: 'Investment & Insurance advisory', status: 'done' },
-    { title: 'ARM Collects Docs', subtitle: 'KYC + Forms + File Prep', status: 'active' },
-    { title: 'Advisor Explains', subtitle: 'Product features & benefits call', status: 'active' },
-    { title: 'Client Buys Policy', subtitle: 'Signs proposal & pays premium', status: 'pending' },
-    { title: 'Commission Credit', subtitle: 'Advisor + RM + ARM payout', status: 'pending' },
-    { title: 'Dashboard Update', subtitle: 'All dashboards refresh live', status: 'blocked' }
-  ]
-
   return (
     <>
-      <div className="grid-3 mb-2">
-        <StatCard icon={faUsers} label="Total Clients" value={fmtNum(data.clientsCount)} sub="Across all regions" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" />
-        <StatCard icon={faUserTie} label="Staff Members" value={fmtNum(data.staffCount)} sub="BM + RM + ARM + Advisor" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" />
-        <StatCard icon={faSackDollar} label="Aggregate AUM" value={fmtINR(data.aum)} sub="All client portfolios" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" />
-        <StatCard icon={faChartLine} label="Net Returns" value={fmtPct(data.netReturns)} sub="Weighted portfolio avg" iconBg="linear-gradient(135deg,#16a085,#0e6251)" />
-        <StatCard icon={faHandHoldingDollar} label="Commission Paid" value={fmtINR(data.commissionGenerated)} sub="Company Payouts (MTD)" iconBg="linear-gradient(135deg,#D12020,#922b21)" />
-        <StatCard icon={faBullhorn} label="New Leads (MTD)" value={fmtNum(data.newLeads)} sub="Fresh prospects added" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" />
+      <div className="dash-grid-stats">
+        <StatCard icon={faUsers} label="Total Clients" value={fmtNum(data.clientsCount)} sub="Registered clients" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" />
+        <StatCard icon={faUserTie} label="Staff Members" value={fmtNum(data.staffCount)} sub="Active staff hierarchy" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" />
+        <StatCard icon={faSackDollar} label="Aggregate AUM" value={fmtINR(data.aum)} sub="Portfolio wealth" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" />
+        <StatCard icon={faChartLine} label="Net Returns" value={fmtPct(data.netReturns)} sub="Weighted avg" iconBg="linear-gradient(135deg,#16a085,#0e6251)" />
+        <StatCard icon={faHandHoldingDollar} label="Commission Paid" value={fmtINR(data.commissionGenerated)} sub="MTD payouts" iconBg="linear-gradient(135deg,#D12020,#922b21)" />
+        <StatCard icon={faArrowTrendUp} label="Conversions" value={data.conversions} sub="Active bookings" accentColor="#25D366" iconBg="linear-gradient(135deg,#25D366,#128c4a)" />
       </div>
 
-      <div className="grid-4 mb-2">
-        <StatCard icon={faArrowTrendUp} label="Conversions" value={data.conversions} sub="MTD policy/SIP bookings" accentColor="#25D366" iconBg="linear-gradient(135deg,#25D366,#128c4a)" />
-        <StatCard icon={faClock} label="Pending Approvals" value={data.pendingApprovals} sub="Awaiting your action" accentColor="#F39C12" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" />
-        <StatCard icon={faBullseye} label="Monthly Target" value={`86%`} sub="Of ₹1.45Cr revenue goal" accentColor="#D12020" iconBg="linear-gradient(135deg,#D12020,#922b21)" />
-        <StatCard icon={faBolt} label="Ops Status" value={data.dashboardStatus} sub="All services operational" accentColor="#0B1C3B" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" />
-      </div>
-
-      <WorkflowPipeline steps={orgWorkflow} title="Organization-Wide Sales Workflow" />
-
-      <div className="card mb-2" style={{
-        background: 'linear-gradient(135deg,#fef3c722,#dbeafe22)',
-        border: '2px dashed #F39C1255'
-      }}>
-        <div className="flex-between mb-2" style={{ flexWrap: 'wrap', gap: '1rem' }}>
-          <div>
-            <h3 style={{ margin: 0, color: '#0B1C3B' }}>
-              <FontAwesomeIcon icon={faNetworkWired} style={{ color: '#D12020', marginRight: 8 }} />
-              Real-Life Cross-Role Workflow — Client Onboarding Journey
-            </h3>
-            <p className="text-muted mb-0" style={{ fontSize: '0.82rem', marginTop: 3 }}>
-              How Employee → RM → ARM → Advisor → Client collaborate in a single customer transaction
-            </p>
-          </div>
-          <span className="badge" style={{ background: '#D12020', color: '#fff', fontWeight: 700 }}>
-            <FontAwesomeIcon icon={faHandshake} /> 8-Stage Unified Flow
-          </span>
-        </div>
-        <div style={{ display: 'flex', overflowX: 'auto', padding: '0.5rem 0', gap: 0 }}>
-          {crossRoleWorkflow.map((s, i) => (
-            <WorkflowStep key={i} {...s} stepNum={i + 1} isLast={i === crossRoleWorkflow.length - 1} />
-          ))}
-        </div>
-      </div>
-
-      <div className="grid-2 mb-2">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <InfoCard
-            icon={faNetworkWired}
-            title="Hierarchy & Team Ops"
-            desc="Oversee 42 staff across complete 6-level hierarchy: Branch Manager → RM → ARM → Employee → Advisor → Client. 12 branches, 4 zones tracked centrally."
-            stats={['4 Zones', `12 Branches`, '42 Active Staff']}
-            color="#2980b9"
-          />
-          <InfoCard
-            icon={faSterlingSign}
-            title="Revenue Engine"
-            desc="Combined monthly revenue ₹1.25Cr across Mutual Funds, Insurance, Loans, Savings. AUM growth 14.8% YoY. Company holds ₹18.5Cr client assets."
-            stats={['4 Verticals', '₹18.5Cr AUM', '14.8% ROI']}
-            color="#8e44ad"
-          />
-          <InfoCard
-            icon={faClipboardCheck}
-            title="KYC & Compliance"
-            desc="Monitor document verification, account openings and policy issuance. SEBI + IRDAI + RBI regulatory compliance across entire 12-branch network."
-            stats={['7 Pending', '248 Verified', '98.2% Pass']}
-            color="#16a085"
-          />
-          <InfoCard
-            icon={faFileInvoiceDollar}
-            title="Payout & Commissions"
-            desc="Automated commission calculation — RM 2%, ARM 0.5%, Advisor 5-25% product-wise. Transparent payout reports every 15th with invoice download."
-            stats={['MTD ₹12.5L', '5 Rate Slabs', '100% On-time']}
-            color="#D12020"
-          />
-        </div>
+      <div className="dash-grid-cols-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
             <h3>Monthly Revenue & Commission Trend</h3>
             <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>Last 6 Months</span>
           </div>
-          <div style={{ width: '100%', height: 320 }}>
+          <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer>
               <BarChart data={data.monthlyRevenue} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f3f8" />
@@ -755,20 +672,18 @@ function AdminDashboard() {
                 <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => (v / 100000).toFixed(1) + 'L'} />
                 <Tooltip formatter={(v) => fmtINR(v)} />
                 <Legend />
-                <Bar dataKey="revenue" name="Total Revenue" fill="#0B1C3B" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="commission" name="Commission Payout" fill="#D12020" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="revenue" name="Revenue" fill="#0B1C3B" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="commission" name="Commission" fill="#D12020" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
 
-      <div className="grid-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
             <h3>Portfolio Distribution — Top Clients (AUM)</h3>
           </div>
-          <div style={{ width: '100%', height: 300 }}>
+          <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer>
               <BarChart data={data.portfolioDist} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f3f8" />
@@ -780,14 +695,15 @@ function AdminDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
 
-        <div className="card">
-          <div className="flex-between mb-1">
-            <h3>Role-wise Performance Snapshot — 6 Levels</h3>
-            <button className="btn-primary btn-sm" onClick={() => navigate('/app/users')}>
-              Manage Users <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: 6 }} />
-            </button>
-          </div>
+      <div className="card mb-2">
+        <div className="flex-between mb-1">
+          <h3>Role-wise Performance Snapshot — 6 Levels</h3>
+          <button className="btn-primary btn-sm" onClick={() => navigate('/app/users')}>
+            Manage Users <FontAwesomeIcon icon={faArrowRight} style={{ marginLeft: 6 }} />
+          </button>
+        </div>
           <div className="table-wrap">
             <table>
               <thead>
@@ -825,9 +741,8 @@ function AdminDashboard() {
             </table>
           </div>
         </div>
-      </div>
 
-      <div className="card">
+        <div className="card">
         <div className="flex-between mb-1">
           <h3>User Directory — Full Hierarchy (7 Roles incl. Branch Manager)</h3>
           <button className="btn-outline btn-sm" onClick={() => navigate('/app/users')}>
@@ -1090,66 +1005,30 @@ function BranchManagerDashboard() {
         </div>
       </div>
 
-      <div className="grid-3 mb-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-        <StatCard icon={faHouseUser} label="Total Staff" value={data.totalStaff} sub="Active Branch Staff" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-        <StatCard icon={faUsers} label="New Clients MTD" value={data.clientsThisMonth} sub="Walk-in + Referral + RM" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
-        <StatCard icon={faMoneyBillTrendUp} label="Revenue MTD" value={fmtINR(data.revenueMTD)} sub="Branch total all verticals" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
-        <StatCard icon={faLandmark} label="Accounts Opened" value={data.newAccounts} sub="Savings + Current MTD" iconBg="linear-gradient(135deg,#25D366,#128c4a)" accentColor="#25D366" />
-        <StatCard icon={faShieldHalved} label="Policies Issued" value={data.policiesIssued} sub="Life + Health Combined" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
-        <StatCard icon={faHandHoldingDollar} label="Loans Disbursed" value={fmtINR(data.loanDisbursed)} sub="Home + Personal MTD" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
+      <div className="dash-grid-stats">
+        <StatCard icon={faHouseUser} label="Total Staff" value={data.totalStaff} sub="Active branch team" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faUsers} label="New Clients MTD" value={data.clientsThisMonth} sub="Walk-in & referral" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
+        <StatCard icon={faMoneyBillTrendUp} label="Revenue MTD" value={fmtINR(data.revenueMTD)} sub="Branch total" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
+        <StatCard icon={faChartLine} label="Mutual Funds" value={data.sipsStarted} sub="Active SIPs Book" iconBg="linear-gradient(135deg,#25D366,#128c4a)" accentColor="#25D366" />
+        <StatCard icon={faArrowTrendUp} label="Stock Accounts" value={data.newAccounts} sub="Demat Client Book" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faStar} label="Customer Rating" value={`${data.customerRating} ★`} sub="Branch score" accentColor="#F39C12" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" />
       </div>
 
-      <div className="grid-4 mb-2">
-        <StatCard icon={faChartLine} label="SIPs Started" value={data.sipsStarted} sub="New Mandates MTD" accentColor="#2980b9" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" />
-        <StatCard icon={faTrophy} label="Zone Ranking" value="—" sub="North Zone" accentColor="#F39C12" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" />
-        <StatCard icon={faStar} label="Customer Rating" value={`${data.customerRating} ★`} sub="Rating Score" accentColor="#8e44ad" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" />
-        <StatCard icon={faGaugeHigh} label="Staff Avg Perf" value="0%" sub="Combined Team Metric" accentColor="#16a085" iconBg="linear-gradient(135deg,#16a085,#0e6251)" />
-      </div>
-
-      <WorkflowPipeline steps={bmWorkflow} title="Branch Manager — Daily Operational Workflow" />
-
-      <div className="grid-2 mb-2">
-        <BigProgress
-          label="Branch Monthly Revenue Target"
-          value={data.revenueMTD}
-          max={data.revenueTarget}
-          color="#D12020"
-          sub="Target tracking active"
-        />
-        <NotifPanel items={data.notices} color="#8e44ad" />
-      </div>
-
-      <div className="grid-2 mb-2">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <InfoCard
-            icon={faUserGroup}
-            title="RM Leadership"
-            desc="Lead 2 Relationship Managers handling 44 premium clients between them. Joint-call on HNI accounts above ₹20L AUM. Approve client concessions and fee waivers."
-            stats={['2 Active RMs', '44 Clients', '₹4.85 Cr AUM']}
-            color="#2980b9"
-          />
-          <InfoCard
-            icon={faClipboardCheck}
-            title="Compliance & Audit"
-            desc="Daily review of KYC queue, cashier cash balance, RBI compliance checklist. Sign 32 new account openings every month. Audit scheduled bi-annually by Zonal Office."
-            stats={['0 Audit Flaws', '98.2% KYC Pass', '15 Sign/Day Avg']}
-            color="#16a085"
-          />
-          <InfoCard
-            icon={faVault}
-            title="Branch Operations"
-            desc="Monitor cashier cabin, locker vault, ATM replenishment, server uptime, staff attendance and housekeeping. Escalate downtime or cash-shortage immediately to ZO."
-            stats={['3 Lockers Free', 'ATM 100% Uptime', '4 Work Counters']}
-            color="#F39C12"
-          />
-          <InfoCard
-            icon={faScaleBalanced}
-            title="Target vs Actual"
-            desc="Branch monthly quota — ₹4.5L revenue, 40 new accounts, 20 policies, 25 SIPs. Track every product line daily in the huddle and course-correct underperformers."
-            stats={['85.6% Revenue', '80% Accounts', '90% Policies']}
-            color="#8e44ad"
+      <div className="dash-grid-cols-2">
+        <div className="card">
+          <div className="flex-between mb-1">
+            <h3>Branch Monthly Revenue Target</h3>
+            <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>Target Tracking</span>
+          </div>
+          <BigProgress
+            label="Revenue Target Progress"
+            value={data.revenueMTD}
+            max={data.revenueTarget}
+            color="#D12020"
+            sub="Branch target performance"
           />
         </div>
+
         <div className="card">
           <div className="flex-between mb-1">
             <h3>Branch Performance — 5 Month Trend</h3>
@@ -1157,7 +1036,7 @@ function BranchManagerDashboard() {
               Growing 📈
             </span>
           </div>
-          <div style={{ width: '100%', height: 320 }}>
+          <div style={{ width: '100%', height: 260 }}>
             <ResponsiveContainer>
               <BarChart data={data.monthly} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f3f8" />
@@ -1166,16 +1045,15 @@ function BranchManagerDashboard() {
                 <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
                 <Tooltip formatter={(v) => v} />
                 <Legend />
-                <Bar yAxisId="right" dataKey="accounts" name="Accounts Opened" fill="#2980b9" radius={[6, 6, 0, 0]} />
-                <Bar yAxisId="right" dataKey="policies" name="Policies Issued" fill="#D12020" radius={[6, 6, 0, 0]} />
-                <Bar yAxisId="left" dataKey="revenue" name="Branch Revenue (₹)" fill="#14305C" radius={[6, 6, 0, 0]} />
+                <Bar yAxisId="right" dataKey="accounts" name="Mutual Funds" fill="#2980b9" radius={[6, 6, 0, 0]} />
+                <Bar yAxisId="right" dataKey="policies" name="Stock Portfolios" fill="#25D366" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
 
-      <div className="grid-2">
+      <div className="dash-grid-cols-2">
         <div className="card">
           <div className="flex-between mb-1">
             <h3>Branch Staff Performance Report</h3>
@@ -1283,98 +1161,44 @@ function ARMDashboard() {
     notifs: []
   })
 
-  const armWorkflow = [
-    { title: 'Task Received from RM', subtitle: 'Meeting / Docs / Call requests', status: 'done' },
-    { title: 'Client Outreach Call', subtitle: 'Appointment confirmation & follow-up', status: 'done' },
-    { title: 'Document Preparation', subtitle: 'KYC forms, loan files verification', status: 'active' },
-    { title: 'Meeting Coordination', subtitle: 'Arrange RM-Client bridge or visit', status: 'active' },
-    { title: 'CRM Status Update', subtitle: 'Log files, notes and completion status', status: 'pending' }
-  ]
-
   return (
     <>
-      <div className="grid-3 mb-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
-        <StatCard icon={faBolt} label="Today's Tasks" value={data.todaysTasks} sub="Assigned by RM Team" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
+      <div className="dash-grid-stats mb-2">
+        <StatCard icon={faBolt} label="Today's Tasks" value={data.todaysTasks} sub="Assigned tasks" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
         <StatCard icon={faFilePdf} label="Pending KYC" value={data.pendingKyc} sub="Verification queue" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
-        <StatCard icon={faCalendarPlus} label="Meeting Schedule" value={data.meetings} sub="Client & RM syncs today" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-        <StatCard icon={faPhone} label="Client Follow-up" value={data.followUps} sub="Pending callback queue" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
-        <StatCard icon={faInbox} label="Pending Policies" value={data.policiesPending} sub="Issuance in-process" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
-        <StatCard icon={faBriefcase} label="Loan Files" value={data.loanFiles} sub="Under verification stage" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" accentColor="#0B1C3B" />
+        <StatCard icon={faCalendarPlus} label="Meeting Schedule" value={data.meetings} sub="RM syncs today" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faPhone} label="Client Follow-up" value={data.followUps} sub="Callbacks" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
+        <StatCard icon={faInbox} label="Pending Policies" value={data.policiesPending} sub="In-process" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
+        <StatCard icon={faUserTie} label="Reporting RM" value={user?.reportsToName || 'Priya Sharma'} sub="Supervisor" accentColor="#2980b9" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" />
       </div>
 
-      <div className="grid-4 mb-2">
-        <StatCard icon={faFileLines} label="Pending Documents" value={data.docsCollected > 32 ? 8 : 14} sub="Aadhaar + PAN + Forms" accentColor="#25D366" iconBg="linear-gradient(135deg,#25D366,#128c4a)" />
-        <StatCard icon={faClipboardCheck} label="Task Completion" value={data.crmUpdates} sub="CRM entries this week" accentColor="#8e44ad" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" />
-        <StatCard icon={faUserTie} label="Reporting RM" value={user?.reportsToName || 'Priya Sharma'} sub="Your Supervisor" accentColor="#2980b9" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" />
-        <StatCard icon={faBullseye} label="Weekly Target" value="78%" sub="Docs & Task completion" accentColor="#F39C12" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" />
-      </div>
-
-      <WorkflowPipeline steps={armWorkflow} title="ARM Daily Workflow — RM Support Pipeline" />
-
-      <div className="grid-2 mb-2">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <InfoCard
-            icon={faHeadset}
-            title="RM Support Desk"
-            desc="Act as the backbone for RM team — schedule high-value client meetings, coordinate document pickups, confirm appointments and handle follow-up calls on behalf of assigned Relationship Managers."
-            stats={['4 RM Buddies', '12 Tasks/Day', '4 Meetings Scheduled']}
-            color="#8e44ad"
-          />
-          <InfoCard
-            icon={faFileSignature}
-            title="Document Management"
-            desc="Collect, scan and verify KYC documents (Aadhaar, PAN, income proofs). Ensure loan files, insurance proposal forms and SIP mandates are complete before RM handoff."
-            stats={['5 KYC Pending', '6 Loan Files', '32 Collected/Wk']}
-            color="#F39C12"
-          />
-          <InfoCard
-            icon={faCalendarPlus}
-            title="Meeting & Diary Ops"
-            desc="Coordinate RM calendars, fix client appointments, prepare meeting kits with relevant product brochures and post-meeting follow-up scheduling."
-            stats={['4 Today', '14 This Week', '98% Attendance']}
-            color="#2980b9"
-          />
-          <InfoCard
-            icon={faGear}
-            title="CRM Data Steward"
-            desc="Keep CRM squeaky clean — log every call, upload documents, update client status, tag next follow-up date and flag any escalations back to RM in real-time."
-            stats={['28 Updates/Wk', '5 Tags/Client', 'Escalations: 2']}
-            color="#16a085"
-          />
+      <div className="card mb-2">
+        <div className="flex-between mb-1">
+          <h3>Weekly Activity — Calls & Meetings</h3>
+          <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>Last 6 Days</span>
         </div>
-        <div className="card">
-          <div className="flex-between mb-1">
-            <h3>Weekly Activity — Calls, Meetings & Docs</h3>
-            <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>Last 6 Days</span>
-          </div>
-          <div style={{ width: '100%', height: 320 }}>
-            <ResponsiveContainer>
-              <AreaChart data={data.weeklyActivity} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="callsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#0B1C3B" stopOpacity={0.35} />
-                    <stop offset="100%" stopColor="#0B1C3B" stopOpacity={0.02} />
-                  </linearGradient>
-                  <linearGradient id="docsGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#D12020" stopOpacity={0.3} />
-                    <stop offset="100%" stopColor="#D12020" stopOpacity={0.02} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f3f8" />
-                <XAxis dataKey="day" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend />
-                <Area type="monotone" dataKey="calls" name="Outbound Calls" stroke="#0B1C3B" strokeWidth={2.5} fill="url(#callsGrad)" />
-                <Area type="monotone" dataKey="docs" name="Docs Collected" stroke="#D12020" strokeWidth={2.5} fill="url(#docsGrad)" />
-                <Line type="monotone" dataKey="meetings" name="Meetings Coordinated" stroke="#F39C12" strokeWidth={2.5} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
+        <div style={{ width: '100%', height: 260 }}>
+          <ResponsiveContainer>
+            <AreaChart data={data.weeklyActivity} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id="callsGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#0B1C3B" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#0B1C3B" stopOpacity={0.02} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f3f8" />
+              <XAxis dataKey="day" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Legend />
+              <Area type="monotone" dataKey="calls" name="Outbound Calls" stroke="#0B1C3B" strokeWidth={2.5} fill="url(#callsGrad)" />
+              <Line type="monotone" dataKey="meetings" name="Meetings" stroke="#F39C12" strokeWidth={2.5} />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      <div className="grid-2 mb-2">
+      <div className="dash-grid-cols-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
             <h3>Insurance Policies — Pending Issue Desk</h3>
@@ -1574,13 +1398,6 @@ function RMDashboard() {
     mfSales: 0
   })
 
-  const rmWorkflow = [
-    { title: 'High-Value Client Meeting', subtitle: 'Face-to-face or Zoom consultation', status: 'done' },
-    { title: 'Portfolio Deep Review', subtitle: 'FD / MF / Insurance / Loan current state', status: 'done' },
-    { title: 'Personalized Suggestions', subtitle: 'Investment, loan, insurance plans', status: 'active' },
-    { title: 'Structured Follow-up', subtitle: 'Close pending issues and answer queries', status: 'active' },
-    { title: 'Revenue & Target Tracking', subtitle: 'Book achieved commission & next target', status: 'pending' }
-  ]
 
   useEffect(() => {
     const load = async () => {
@@ -1615,88 +1432,47 @@ function RMDashboard() {
 
   return (
     <>
-      <div className="grid-4 mb-2">
+      <div className="dash-grid-stats mb-2">
         <StatCard icon={faUsers} label="Assigned Clients" value={data.assignedClients} sub="Total Book Size" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-        <StatCard icon={faStar} label="Premium Clients" value={data.premiumClients} sub="HNI — Above ₹20L AUM" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
-        <StatCard icon={faCalendarPlus} label="Today's Meetings" value={data.meetings} sub="4 Client + 2 Internal" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
-        <StatCard icon={faBriefcase} label="Product Sales" value={data.salesCount} sub="Loan / Insurance / MF MTD" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
-        <StatCard icon={faHandHoldingDollar} label="Revenue" value={fmtINR(data.revenue)} sub="MTD commission generated" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
-        <StatCard icon={faSackDollar} label="Target" value={fmtINR(data.target)} sub="Your monthly quota" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" accentColor="#0B1C3B" />
-        <StatCard icon={faChartLine} label="Performance" value={`${data.performance}%`} sub="Target Achievement" iconBg="linear-gradient(135deg,#25D366,#128c4a)" accentColor="#25D366" />
+        <StatCard icon={faStar} label="Premium Clients" value={data.premiumClients} sub="HNI Clients" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
         <StatCard icon={faPiggyBank} label="Total AUM Book" value={fmtINR(data.aumBook)} sub="All client assets" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-      </div>
-
-      <div className="grid-4 mb-2">
-        <StatCard icon={faShieldHalved} label="Insurance Sales" value={data.insSales} sub="Life + Health Policies" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
-        <StatCard icon={faChartPie} label="Mutual Fund Sales" value={data.mfSales} sub="SIP + Lumpsum Booked" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
-        <StatCard icon={faPhone} label="Pending Follow-up" value={data.upsellPipeline} sub="Client & RM callbacks" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faBriefcase} label="Product Sales" value={data.salesCount} sub="Mutual Funds & Stocks" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
+        <StatCard icon={faHandHoldingDollar} label="Revenue MTD" value={fmtINR(data.revenue)} sub="Commission generated" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
         <StatCard icon={faMoneyBillTrendUp} label="Commission" value={fmtINR(data.commission)} sub={`FY: ${fmtINR(data.commissionYear)}`} iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
       </div>
 
-      <WorkflowPipeline steps={rmWorkflow} title="RM Client Advisory Workflow" />
-
-      <div className="grid-2 mb-2">
+      <div className="dash-grid-cols-2 mb-2">
         <BigProgress
           label="My Commission Earnings MTD"
           value={data.commission}
           max={90000}
           color="#8e44ad"
-          sub={`₹22,500 incremental on target • Incentive slab 2% of AUM growth`}
+          sub={`Incentive slab 2% of AUM growth`}
         />
         <BigProgress
           label="Revenue Target — August 2026"
           value={data.revenue}
           max={data.target}
           color="#D12020"
-          sub={`${fmtINR(data.target - data.revenue)} more to achieve 100% • 5 client meetings lined up this week`}
+          sub={`${fmtINR(data.target - data.revenue)} remaining to 100% target`}
         />
       </div>
 
-      <div className="grid-2 mb-2">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <InfoCard
-            icon={faUsers}
-            title="Client Relationship"
-            desc="Personally manage 24 clients including 8 premium HNI accounts. Conduct quarterly portfolio reviews, understand life-stage goals and anticipate investment needs before they ask."
-            stats={['8 HNI Clients', '24 Book Size', '94% Retention']}
-            color="#2980b9"
-          />
-          <InfoCard
-            icon={faChartPie}
-            title="Wealth Advisory"
-            desc="Deep review of MF portfolio, fixed income holdings, insurance coverage and outstanding loans. Rebalance allocation, suggest top-ups or switches based on market regime."
-            stats={['₹3.25 Cr AUM', '5 Product Lines', '14.8% Avg Return']}
-            color="#8e44ad"
-          />
-          <InfoCard
-            icon={faSackDollar}
-            title="Cross-Sell & Upsell"
-            desc="Identify upsell opportunities across the book. Convert SIP to lumpsum, enhance life cover, top-up health insurance and pitch loan balance transfers for eligible clients."
-            stats={['7 in Pipeline', '15 MTD Sales', '45% MF Mix']}
-            color="#D12020"
-          />
-          <InfoCard
-            icon={faPeopleGroup}
-            title="Team Leadership"
-            desc="Lead 3 Advisors and 1 ARM. Set weekly targets, joint-call for premium clients, review commission statements and mentor the team on product knowledge and closing skills."
-            stats={['3 Advisors', '1 ARM Buddy', '90% Team Perf']}
-            color="#16a085"
-          />
-        </div>
+      <div className="dash-grid-cols-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
-            <h3>Product Sales Mix — Current Quarter</h3>
+            <h3>Product Sales Mix</h3>
             <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>₹4.5L Commission</span>
           </div>
-          <div style={{ width: '100%', height: 320 }}>
+          <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={data.salesBreakdown}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={110}
+                  innerRadius={50}
+                  outerRadius={95}
                   paddingAngle={2}
                   dataKey="value"
                   label={({ name, value }) => `${name} ${value}%`}
@@ -1711,9 +1487,6 @@ function RMDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
-
-      <div className="grid-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
             <h3>Quarterly Performance & Commission</h3>
@@ -1735,20 +1508,22 @@ function RMDashboard() {
             </ResponsiveContainer>
           </div>
         </div>
+      </div>
 
+      <div className="dash-grid-cols-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
-            <h3>Loan Status — My Client Book</h3>
-            <span className="badge" style={{ background: '#0B1C3B22', color: '#14305C', fontWeight: 700 }}>4 Live</span>
+            <h3>Client Investment Book</h3>
+            <span className="badge" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 700 }}>Active</span>
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Client</th>
-                  <th>Loan Product</th>
+                  <th>Investment Type</th>
                   <th>Amount</th>
-                  <th>Stage</th>
+                  <th>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -1773,10 +1548,12 @@ function RMDashboard() {
               </tbody>
             </table>
           </div>
-          <div className="mt-1" style={{ marginTop: '0.75rem' }}>
-            <h5 style={{ margin: '0 0 0.5rem 0', color: '#64748b', fontSize: '0.78rem' }}>
-              <FontAwesomeIcon icon={faCircleCheck} style={{ color: '#16a34a' }} /> Portfolio Review & Follow-up Tracker
-            </h5>
+        </div>
+
+        <div className="card">
+          <div className="flex-between mb-1">
+            <h3>Portfolio Review & Follow-up</h3>
+            <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>Active</span>
           </div>
           <div className="table-wrap">
             <table>
@@ -1811,10 +1588,10 @@ function RMDashboard() {
                       </span>
                     </td>
                     <td>
-                      <span className={`badge badge-${c.followUp.includes('Done') || c.followUp.includes('Disbursed') ? 'active' : c.followUp.includes('Scheduled') ? 'inactive' : 'inactive'}`}
+                      <span className={`badge badge-${c.followUp?.includes('Done') || c.followUp?.includes('Disbursed') ? 'active' : 'inactive'}`}
                         style={
-                          c.followUp.includes('Scheduled') ? { background: '#dbeafe', color: '#1d4ed8' } :
-                          c.followUp.includes('Pending') || c.followUp.includes('On-boarded') ? { background: '#fef3c7', color: '#92400e' } : {}
+                          c.followUp?.includes('Scheduled') ? { background: '#dbeafe', color: '#1d4ed8' } :
+                          c.followUp?.includes('Pending') || c.followUp?.includes('On-boarded') ? { background: '#fef3c7', color: '#92400e' } : {}
                         }>
                         {c.followUp}
                       </span>
@@ -1905,83 +1682,42 @@ function AdvisorDashboard() {
     sipBook: []
   })
 
-  const advisorWorkflow = [
-    { title: 'Client Prospecting', subtitle: 'Generate leads via referrals & outreach', status: 'done' },
-    { title: 'Product Counseling', subtitle: 'Explain insurance & mutual fund solutions', status: 'done' },
-    { title: 'Sale Closure', subtitle: 'Policy proposal or SIP mandate signed', status: 'active' },
-    { title: 'KYC Completion', subtitle: 'Documents submitted & verification completed', status: 'active' },
-    { title: 'Commission Earned', subtitle: 'Brokerage credit issued to account', status: 'pending' }
-  ]
 
   return (
     <>
-      <div className="grid-4 mb-2">
-        <StatCard icon={faUsers} label="Total Clients" value={data.totalClients} sub="With live portfolio" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
-        <StatCard icon={faCalendarPlus} label="Today's Meetings" value={data.todaysMeetings} sub="Client calls & branch visits" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-        <StatCard icon={faFileSignature} label="Policies Sold" value={data.policySold} sub="Current Month Bookings" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
+      <div className="dash-grid-stats mb-2">
+        <StatCard icon={faUsers} label="Total Clients" value={data.totalClients} sub="Active portfolio" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
+        <StatCard icon={faCalendarPlus} label="Today's Meetings" value={data.todaysMeetings} sub="Client visits & calls" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faArrowTrendUp} label="Stock Trades" value={data.policySold} sub="Current Month" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
         <StatCard icon={faChartLine} label="Mutual Fund SIPs" value={fmtINR(data.mfSip)} sub="Monthly Inflow" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
-        <StatCard icon={faHandHoldingDollar} label="Commission" value={fmtINR(data.commission)} sub="Earned Month-to-date" iconBg="linear-gradient(135deg,#25D366,#128c4a)" accentColor="#25D366" />
-        <StatCard icon={faRotate} label="Renewals" value={data.renewals} sub="Premium & SIP top-up" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
+        <StatCard icon={faHandHoldingDollar} label="Commission" value={fmtINR(data.commission)} sub="Month-to-date" iconBg="linear-gradient(135deg,#25D366,#128c4a)" accentColor="#25D366" />
         <StatCard icon={faBullseye} label="Target Progress" value={`${data.targetProgress}%`} sub="Monthly Sales Quota" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" accentColor="#0B1C3B" />
-        <StatCard icon={faIdCard} label="Pending KYC" value={5} sub="Aadhaar + PAN + Income Proof" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
       </div>
 
-      <div className="grid-2 mb-2">
+      <div className="dash-grid-cols-2 mb-2">
         <BigProgress
-          label="Sales Target — Policies & SIP Combined"
+          label="Sales Target — Equity & SIP Combined"
           value={data.policySold}
           max={data.targetSales}
           color="#D12020"
-          sub={`${data.targetSales - data.policySold} more policies to achieve monthly target • Close rate 39% currently`}
+          sub={`${data.targetSales - data.policySold} more orders to achieve monthly target`}
         />
         <BigProgress
           label="Commission Earnings Goal"
           value={data.commission}
           max={data.targetCommission}
           color="#16a085"
-          sub={`Next payout 15th August • FY earnings so far ₹5,80,000 across 42 clients`}
+          sub={`Next payout scheduled 15th August`}
         />
       </div>
 
-      <WorkflowPipeline steps={advisorWorkflow} title="Advisor Sales Workflow — Prospect to Payout" />
-
-      <div className="grid-2 mb-2">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-          <InfoCard
-            icon={faBullhorn}
-            title="Lead Generation"
-            desc="Build your own prospect funnel through client referrals, cold outreach, social media and RM handoffs. Convert leads into meetings and then into sales."
-            stats={['14 Hot Leads', '5 Sources', '39% Avg Close']}
-            color="#D12020"
-          />
-          <InfoCard
-            icon={faLightbulb}
-            title="Product Knowledge"
-            desc="Explain Term Life, Health, ULIP, Endowment, Mutual Fund (SIP & Lumpsum). Illustrate maturity benefits, tax deductions under 80C/D and claim process examples."
-            stats={['4 Product Lines', '18 Policies MTD', '42 Live Clients']}
-            color="#8e44ad"
-          />
-          <InfoCard
-            icon={faIdCard}
-            title="KYC & Documentation"
-            desc="Ensure every sale is backed by clean KYC — Aadhaar, PAN, Income Proof, Account Details. Follow-up for missing documents so policy issues fast."
-            stats={['5 Pending', '13 Completed', '2.1 Day Avg TAT']}
-            color="#F39C12"
-          />
-          <InfoCard
-            icon={faCoins}
-            title="Commission & Payouts"
-            desc="Track your earnings on every policy and SIP booked — first-year commission, renewal commission and MF trail. Payouts are credited directly to your bank every 15th."
-            stats={['MTD ₹48,500', 'Next: 15 Aug', 'FY ₹5.8L']}
-            color="#16a085"
-          />
-        </div>
+      <div className="dash-grid-cols-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
-            <h3>Weekly Funnel — Leads → Demos → Closings</h3>
-            <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>Month of August</span>
+            <h3>Weekly Funnel — Leads & Closings</h3>
+            <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>August</span>
           </div>
-          <div style={{ width: '100%', height: 320 }}>
+          <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer>
               <BarChart data={data.weeklyLeads} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f3f8" />
@@ -1993,6 +1729,35 @@ function AdvisorDashboard() {
                 <Bar dataKey="demos" name="Product Demos" fill="#2980b9" radius={[6, 6, 0, 0]} />
                 <Bar dataKey="closes" name="Sales Closed" fill="#25D366" radius={[6, 6, 0, 0]} />
               </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="flex-between mb-1">
+            <h3>Product Sales Mix</h3>
+            <span className="badge" style={{ background: '#f3e8ff', color: '#7e22ce' }}>Commission</span>
+          </div>
+          <div style={{ width: '100%', height: 280 }}>
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={data.allocation}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={50}
+                  outerRadius={95}
+                  paddingAngle={2}
+                  dataKey="value"
+                  label={({ name, value }) => `${name} ${value}%`}
+                >
+                  {data.allocation.map((_, i) => (
+                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v) => v + '%'} />
+                <Legend />
+              </PieChart>
             </ResponsiveContainer>
           </div>
         </div>
@@ -2044,36 +1809,7 @@ function AdvisorDashboard() {
         </div>
       </div>
 
-      <div className="grid-2 mb-2">
-        <div className="card">
-          <div className="flex-between mb-1">
-            <h3>Product-wise Sales Mix — Commission</h3>
-            <span className="badge" style={{ background: '#f3e8ff', color: '#7e22ce' }}>Commission Split</span>
-          </div>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <PieChart>
-                <Pie
-                  data={data.allocation}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={110}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={({ name, value }) => `${name} ${value}%`}
-                >
-                  {data.allocation.map((_, i) => (
-                    <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v) => v + '%'} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
+      <div className="dash-grid-cols-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
             <h3>
@@ -2109,12 +1845,10 @@ function AdvisorDashboard() {
             </table>
           </div>
         </div>
-      </div>
 
-      <div className="grid-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
-            <h3>Lead Sources — Quality & Conversion</h3>
+            <h3>Lead Sources</h3>
             <span className="badge badge-active" style={{ background: '#dcfce7', color: '#16a34a' }}>Total 69 Leads</span>
           </div>
           <div className="table-wrap">
@@ -2162,6 +1896,7 @@ function AdvisorDashboard() {
             </table>
           </div>
         </div>
+      </div>
 
         <div className="card">
           <div className="flex-between mb-1">
@@ -2209,7 +1944,6 @@ function AdvisorDashboard() {
             </table>
           </div>
         </div>
-      </div>
     </>
   )
 }
@@ -2227,9 +1961,9 @@ function EmployeeDashboard() {
       salary: { payslipId: 'SLP-2026-0000', month: 'August 2026', basic: 0, hra: 0, incentive: 0, pf: 0, professionalTax: 0, net: 0 },
       notifications: [],
       quickActions: [
-        { icon: faUserPlus, label: 'New Account', color: '#25D366', action: 'new-account' },
-        { icon: faShieldHalved, label: 'Insurance', color: '#9333ea', action: 'insurance' },
-        { icon: faSackDollar, label: 'Mutual Fund', color: '#ca8a04', action: 'mutual-fund' },
+        { icon: faUserPlus, label: 'New Client', color: '#25D366', action: 'new-account' },
+        { icon: faChartLine, label: 'Stocks / Equity', color: '#1d4ed8', action: 'stocks' },
+        { icon: faSackDollar, label: 'Mutual Funds', color: '#ca8a04', action: 'mutual-fund' },
         { icon: faFileInvoice, label: 'Reports', color: '#0891b2', action: 'reports' }
       ],
       footfall: [],
@@ -2252,46 +1986,17 @@ function EmployeeDashboard() {
           </div>
         </div>
 
-        <div className="grid-4 mt-1">
-          <StatCard icon={faUsers} label="Today's Customers" value={fmtNum(data.todayCustomers)} sub="0 Deposit · 0 Withdraw · 0 Service" color="#0B1C3B" />
-          <StatCard icon={faCreditCard} label="Today's Account Openings" value={fmtNum(data.accountOpenings)} sub="0 Savings · 0 Current · 0 PPF" color="#25D366" />
-          <StatCard icon={faClock} label="Pending Verifications" value={fmtNum(data.pendingVerifications)} sub="0 Aadhaar · 0 PAN · 0 Photo" color="#F39C12" />
-          <StatCard icon={faCopy} label="Loan Requests" value={fmtNum(data.loanRequests)} sub="0 Home · 0 Personal · 0 Vehicle" color="#D12020" />
-        </div>
-        <div className="grid-4 mt-1">
-          <StatCard icon={faShieldHalved} label="Insurance Requests" value={fmtNum(data.insuranceRequests)} sub="0 Life · 0 Health" color="#9333ea" />
-          <StatCard icon={faChartLine} label="Mutual Fund Requests" value={fmtNum(data.mfRequests)} sub="0 SIP · 0 Lumpsum" color="#ca8a04" />
-          <StatCard icon={faHandHoldingDollar} label="Cash Handled Today" value={fmtINR(0)} sub="₹0 Deposit · ₹0 Withdraw" color="#0e7490" />
-          <StatCard icon={faFileLines} label="Reports Generated" value="0" sub="0 Cash · 0 Account · 0 Audit" color="#0891b2" />
-        </div>
-
-        <div className="grid-2 mt-1">
-          <div className="card">
-            <h3 className="mb-1">🗓️ Weekly Attendance</h3>
-            <AttendanceWeek record={data.attendance} />
-          </div>
-          <div>
-            <SalarySlip data={data.salary} />
-          </div>
-        </div>
-
-        <div className="grid-3 mt-1">
-          <div className="card" style={{ gridColumn: 'span 2' }}>
-            <h3 className="mb-1">Daily Office Workflow</h3>
-            <WorkflowPipeline steps={[
-              { no: 1, title: 'Report to Branch', desc: 'Login, Cash vault check', status: 'Done' },
-              { no: 2, title: 'Customer Welcome', desc: 'Token, Query Resolution', status: 'Done' },
-              { no: 3, title: 'Document Verification', desc: 'Aadhaar + PAN + KYC', status: 'Active' },
-              { no: 4, title: 'Transaction Processing', desc: 'Account, Loan, Insurance, MF', status: 'Pending' },
-              { no: 5, title: 'End-of-Day Reports', desc: 'Cash tally, MIS, Vault close', status: 'Pending' }
-            ]} />
-          </div>
-          <NotifPanel items={data.notifications} />
+        <div className="dash-grid-stats mt-1">
+          <StatCard icon={faUsers} label="Today's Customers" value={fmtNum(data.todayCustomers)} sub="Branch Footfall" color="#0B1C3B" />
+          <StatCard icon={faCreditCard} label="Client Onboarding" value={fmtNum(data.accountOpenings)} sub="Demat & MF KYC" color="#25D366" />
+          <StatCard icon={faClock} label="Pending Verifications" value={fmtNum(data.pendingVerifications)} sub="KYC Queue" color="#F39C12" />
+          <StatCard icon={faArrowTrendUp} label="Stock Orders" value={fmtNum(data.loanRequests)} sub="Equity Trades" color="#1d4ed8" />
+          <StatCard icon={faChartLine} label="Mutual Fund Requests" value={fmtNum(data.mfRequests)} sub="SIP & Lumpsum" color="#ca8a04" />
         </div>
 
         <div className="card mt-1">
           <h3 className="mb-1">⚡ Quick Actions — Counter Work</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
             {data.quickActions.map((q, i) => (
               <div
                 key={i}
@@ -2320,10 +2025,20 @@ function EmployeeDashboard() {
           </div>
         </div>
 
-        <div className="grid-2 mt-1">
+        <div className="dash-grid-cols-2 mt-1">
+          <div className="card">
+            <h3 className="mb-1">🗓️ Weekly Attendance</h3>
+            <AttendanceWeek record={data.attendance} />
+          </div>
+          <div>
+            <SalarySlip data={data.salary} />
+          </div>
+        </div>
+
+        <div className="dash-grid-cols-2 mt-1">
           <div className="card">
             <h3 className="mb-1">📊 Branch Footfall — This Week</h3>
-            <div style={{ width: '100%', height: '260px' }}>
+            <div style={{ width: '100%', height: '240px' }}>
               <AreaChart data={data.footfall}>
                 <defs>
                   <linearGradient id="custGrad" x1="0" y1="0" x2="0" y2="1">
@@ -2345,16 +2060,16 @@ function EmployeeDashboard() {
               <span className="badge" style={{ background: '#fef3c7', color: '#92400e', fontWeight: 700 }}>0% Complete</span>
             </div>
             <BigProgress label="Branch Deposit Target" value={0} max={0} color="#25D366" sub="₹0 / ₹0" />
-            <div style={{ marginTop: '1rem' }}>
+            <div style={{ marginTop: '0.85rem' }}>
               <BigProgress label="Account Opening Target" value={0} max={0} color="#0B1C3B" sub="0 A/C / 0 A/C" />
             </div>
-            <div style={{ marginTop: '1rem' }}>
+            <div style={{ marginTop: '0.85rem' }}>
               <BigProgress label="Cross-Sell (Insurance)" value={0} max={0} color="#9333ea" sub="0 Policies / 0 Target" />
             </div>
           </div>
         </div>
 
-        <div className="grid-2 mt-1">
+        <div className="dash-grid-cols-2 mt-1">
           <div className="card">
             <div className="flex-between mb-1">
               <h3>📋 Counter Register — Today's Transactions</h3>
@@ -2401,7 +2116,7 @@ function EmployeeDashboard() {
                   <tr>
                     <th>Customer</th>
                     <th>Document</th>
-                    <th>Age (Days)</th>
+                    <th>Age</th>
                     <th>Priority</th>
                   </tr>
                 </thead>
@@ -2423,12 +2138,6 @@ function EmployeeDashboard() {
                 </tbody>
               </table>
             </div>
-            <div style={{ marginTop: '1rem', padding: '0.75rem', borderRadius: '8px', background: '#fff7ed', border: '1px solid #fed7aa' }}>
-              <div style={{ fontWeight: 700, color: '#92400e' }}>💡 Standard Branch Workflow</div>
-              <div style={{ fontSize: '0.88rem', color: '#78350f', marginTop: '0.4rem' }}>
-                <b>Client Walk-in Protocol:</b> Verify Aadhaar ✔ Verify PAN ✔ Open Savings Account ✔ Issue Debit Card ✔ — Service Request Completed.
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -2449,251 +2158,306 @@ function ClientDashboard() {
     nomName: 'Nominee on File',
     color: '#0B1C3B'
   }
-  const data = {
-    savingsAcc: { no: 'SB-0000 0000 0000', balance: 0, ifsc: 'GEN0000001' },
-    fdTotal: 0,
-    mfValue: 0,
-    insuranceSum: 0,
-    loanEmi: 0,
-    docs: [],
-    tickets: [],
-    insurance: [],
-    mutualFunds: [],
-    loan: [],
-    transactions: [],
-    cashflow: [],
-    wealthAlloc: []
-  }
+
+  const [portfolioData, setPortfolioData] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchPortfolio = async () => {
+      try {
+        const res = await api.get('/portfolio/me')
+        if (isMounted && res.data && res.data.portfolio) {
+          setPortfolioData(res.data.portfolio)
+        }
+      } catch (err) {
+        // use clean fallback
+      }
+    }
+    fetchPortfolio()
+    return () => { isMounted = false }
+  }, [])
+
+  // Partition portfolio holdings into Mutual Funds and Stocks:
+  const rawHoldings = portfolioData?.holdings || []
+  
+  const mutualFunds = rawHoldings.filter(h => 
+    h.type === 'MF' || 
+    h.category === 'Mutual Fund' || 
+    (h.name && (h.name.toLowerCase().includes('fund') || h.name.toLowerCase().includes('index') || h.name.toLowerCase().includes('sip')))
+  )
+
+  const stocks = rawHoldings.filter(h => !mutualFunds.includes(h))
+
+  const totalValue = portfolioData?.totalValue || (rawHoldings.reduce((sum, h) => sum + (Number(h.totalValue) || Number(h.currentPrice * h.units) || 0), 0))
+  const totalInvested = portfolioData?.totalInvested || (rawHoldings.reduce((sum, h) => sum + (Number(h.invested) || Number(h.avgPrice * h.units) || 0), 0))
+  const netReturns = totalInvested > 0 ? totalValue - totalInvested : 0
+  const returnsPct = portfolioData?.returnsPct || (totalInvested > 0 ? +((netReturns / totalInvested) * 100).toFixed(2) : 0)
+
+  const mfValue = mutualFunds.reduce((sum, h) => sum + (Number(h.totalValue) || Number(h.currentPrice * h.units) || 0), 0)
+  const mfInvested = mutualFunds.reduce((sum, h) => sum + (Number(h.invested) || Number(h.avgPrice * h.units) || 0), 0)
+
+  const stockValue = stocks.reduce((sum, h) => sum + (Number(h.totalValue) || Number(h.currentPrice * h.units) || 0), 0)
+  const stockInvested = stocks.reduce((sum, h) => sum + (Number(h.invested) || Number(h.avgPrice * h.units) || 0), 0)
+
+  const recentTxns = portfolioData?.transactions || []
+
   return (
     <div>
-      <div className="grid-3">
-        <div style={{ gridColumn: 'span 2' }}>
-          <ProfileCard client={{ ...profile, accounts: 'Savings Account', since: 'New Account' }} />
-        </div>
-        <div className="grid-2">
-          <StatCard icon={faPiggyBank} label="Savings A/c" value={fmtINR(data.savingsAcc.balance)} sub={`${data.savingsAcc.no.slice(-4)}`} color="#0B1C3B" />
-          <StatCard icon={faVault} label="Fixed Deposits" value={fmtINR(data.fdTotal)} sub="0 FDs Active" color="#25D366" />
-          <StatCard icon={faChartLine} label="Mutual Funds" value={fmtINR(data.mfValue)} sub="0 Schemes" color="#F39C12" />
-          <StatCard icon={faShieldHalved} label="Insurance Cover" value={fmtINR(data.insuranceSum)} sub={`${data.insurance.length} Active Policies`} color="#9333ea" />
+      <div className="dash-grid-cols-2">
+        <ProfileCard client={{ ...profile, accounts: 'Demat & Mutual Funds', since: 'Active Account' }} />
+        <div className="dash-grid-stats">
+          <StatCard icon={faWallet} label="Total Portfolio" value={fmtINR(totalValue)} sub={`Invested: ${fmtINR(totalInvested)}`} color="#0B1C3B" />
+          <StatCard icon={faChartLine} label="Mutual Funds" value={fmtINR(mfValue)} sub={`${mutualFunds.length} Active Schemes`} color="#F39C12" />
+          <StatCard icon={faArrowTrendUp} label="Stock Holdings" value={fmtINR(stockValue)} sub={`${stocks.length} Companies`} color="#25D366" />
+          <StatCard icon={faCoins} label="Unrealized Returns" value={`${netReturns >= 0 ? '+' : ''}${fmtINR(netReturns)}`} sub={`${returnsPct >= 0 ? '+' : ''}${returnsPct}% Net Gain`} color={netReturns >= 0 ? '#16a34a' : '#dc2626'} />
         </div>
       </div>
 
-      <div className="card mt-1">
-        <h3 className="mb-1">🛤️ Your Client Journey</h3>
-        <WorkflowPipeline steps={[
-          { no: 1, title: 'Account Registered', desc: 'Authentication Setup Complete', status: 'Done' },
-          { no: 2, title: 'KYC Verification', desc: 'Submit Identity & Address Proof', status: 'Active' },
-          { no: 3, title: 'First Investment / Deposit', desc: 'Savings, FD or Mutual Fund', status: 'Pending' },
-          { no: 4, title: 'Insurance Protection', desc: 'Life & Health Coverage', status: 'Pending' },
-          { no: 5, title: 'Wealth Management', desc: 'Portfolio Advisory & Growth', status: 'Pending' }
-        ]} />
-      </div>
-
-        <div className="grid-2 mt-1">
-          <div className="card">
-            <h3 className="mb-1">📁 KYC Documents Vault</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
-              {data.docs.map((d, i) => (
-                <DocCard key={i} icon={d.icon} title={d.title} status={d.status} uploaded={d.uploaded} color={d.color} />
-              ))}
-            </div>
-            <button className="btn btn-primary mt-1" style={{ width: '100%' }}>
-              <FontAwesomeIcon icon={faUpload} /> &nbsp; Upload Pending Documents
-            </button>
+      <div className="dash-grid-cols-2 mt-1">
+        {/* Mutual Funds Holdings Card */}
+        <div className="card">
+          <div className="flex-between mb-1">
+            <h3>📈 Mutual Fund Holdings</h3>
+            <span className="badge" style={{ background: '#fef3c7', color: '#b45309', fontWeight: 700 }}>
+              {mutualFunds.length} {mutualFunds.length === 1 ? 'Scheme' : 'Schemes'}
+            </span>
           </div>
-          <div>
-            <SupportTickets tickets={data.tickets} />
-          </div>
-        </div>
-
-        <div className="grid-2 mt-1">
-          <div className="card">
-            <div className="flex-between mb-1">
-              <h3>🛡️ My Insurance Policies</h3>
-              <span className="badge" style={{ background: '#dcfce7', color: '#16a34a' }}>{data.insurance.length} Active</span>
-            </div>
-            <div className="table-wrap">
-              <table>
-                <thead>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Scheme</th>
+                  <th>Units</th>
+                  <th>NAV</th>
+                  <th>Value</th>
+                  <th>Returns</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mutualFunds.length === 0 ? (
                   <tr>
-                    <th>Plan</th>
-                    <th>Policy No.</th>
-                    <th>Premium</th>
-                    <th>Sum Assured</th>
-                    <th>Next Due</th>
+                    <td colSpan="5" style={{ textAlign: 'center', color: '#64748b', padding: '1.5rem 0.5rem', fontStyle: 'italic' }}>
+                      No active Mutual Fund schemes in your portfolio.
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {data.insurance.map((p, i) => (
-                    <tr key={i}>
-                      <td style={{ fontWeight: 700 }}>{p.name}</td>
-                      <td style={{ fontFamily: 'monospace', fontSize: '0.82rem' }}>{p.policyNo}</td>
-                      <td style={{ fontWeight: 600 }}>{fmtINR(p.premium)}</td>
-                      <td style={{ fontWeight: 700, color: '#16a34a' }}>{fmtINR(p.sumAssured)}</td>
-                      <td style={{ fontSize: '0.85rem', color: '#0B1C3B', fontWeight: 600 }}>{p.nextDue}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="card">
-            <div className="flex-between mb-1">
-              <h3>📈 Mutual Fund Holdings</h3>
-              <span className="badge" style={{ background: '#dcfce7', color: '#16a34a' }}>+18.4% CAGR</span>
-            </div>
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Scheme</th>
-                    <th>Units</th>
-                    <th>NAV</th>
-                    <th>Value</th>
-                    <th>XIRR</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.mutualFunds.map((f, i) => (
-                    <tr key={i}>
-                      <td style={{ fontWeight: 600 }}>{f.scheme}</td>
-                      <td style={{ fontFamily: 'monospace' }}>{f.units.toFixed(2)}</td>
-                      <td style={{ fontWeight: 600 }}>₹{f.nav.toFixed(2)}</td>
-                      <td style={{ fontWeight: 700 }}>{fmtINR(f.value)}</td>
-                      <td>
-                        <span className="badge" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 700 }}>+{f.xirr}%</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.9rem', borderRadius: '8px', background: 'linear-gradient(90deg, #ecfdf5, #dcfce7)', display: 'flex', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ fontSize: '0.78rem', color: '#475569' }}>Total Investment</div>
-                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0B1C3B' }}>{fmtINR(0)}</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '0.78rem', color: '#475569' }}>Unrealized P/L</div>
-                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#16a34a' }}>+{fmtINR(0)}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid-2 mt-1">
-          <div className="card">
-            <div className="flex-between mb-1">
-              <h3>🏠 Home Loan EMI Schedule</h3>
-              <span className="badge" style={{ background: '#dbeafe', color: '#1d4ed8', fontWeight: 700 }}>EMI {fmtINR(data.loanEmi)} /mo</span>
-            </div>
-            <div className="table-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>EMI</th>
-                    <th>Principal</th>
-                    <th>Interest</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.loan.map((l, i) => (
-                    <tr key={i}>
-                      <td style={{ fontWeight: 600 }}>{l.date}</td>
-                      <td style={{ fontWeight: 700 }}>{fmtINR(l.emi)}</td>
-                      <td style={{ color: '#16a34a', fontWeight: 600 }}>{fmtINR(l.principal)}</td>
-                      <td style={{ color: '#dc2626', fontWeight: 600 }}>{fmtINR(l.interest)}</td>
-                      <td>
-                        <span className="badge" style={{
-                          background: l.status === 'Paid' ? '#dcfce7' : l.status === 'Upcoming' ? '#fef3c7' : '#f1f5f9',
-                          color: l.status === 'Paid' ? '#16a34a' : l.status === 'Upcoming' ? '#92400e' : '#475569', fontWeight: 700
-                        }}>{l.status}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div style={{ marginTop: '0.8rem', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem' }}>
-              <InfoCard icon={faHandshake} title="Outstanding" value={fmtINR(0)} sub="No Active Loan" />
-              <InfoCard icon={faCalendar} title="Tenor" value="0 Months" sub="0 EMIs" />
-              <InfoCard icon={faPercent} title="Rate & Status" value="0.00% p.a." sub="N/A" />
-            </div>
-          </div>
-          <div className="grid-2">
-            <div className="card">
-              <h3 className="mb-1">💸 Cashflow Trend</h3>
-              <div style={{ width: '100%', height: '220px' }}>
-                <BarChart data={data.cashflow}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis dataKey="m" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip />
-                  <Legend wrapperStyle={{ fontSize: '0.78rem' }} />
-                  <Bar dataKey="in" name="Income ₹" fill="#25D366" radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="out" name="Expense ₹" fill="#D12020" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </div>
-            </div>
-            <div className="card">
-              <h3 className="mb-1">💼 Wealth Allocation</h3>
-              <div style={{ width: '100%', height: '220px' }}>
-                <PieChart>
-                  <Pie data={data.wealthAlloc} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={70} label={(e) => `${e.name} ₹${(e.value / 100000).toFixed(1)}L`}>
-                    {data.wealthAlloc.map((e, i) => (
-                      <Cell key={i} fill={e.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(v) => fmtINR(v)} />
-                </PieChart>
-              </div>
-            </div>
-            <div className="card" style={{ gridColumn: 'span 2' }}>
-              <div className="flex-between mb-1">
-                <h3>📒 Recent A/c Transactions</h3>
-                <div style={{ display: 'flex', gap: '0.4rem' }}>
-                  <button className="btn btn-sm btn-outline"><FontAwesomeIcon icon={faFilePdf} /> PDF</button>
-                  <button className="btn btn-sm btn-outline"><FontAwesomeIcon icon={faFileExcel} /> Tax</button>
-                </div>
-              </div>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Particulars</th>
-                      <th>Category</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.transactions.map((t, i) => (
+                ) : (
+                  mutualFunds.map((f, i) => {
+                    const val = Number(f.totalValue) || Number(f.currentPrice * f.units) || 0
+                    const inv = Number(f.invested) || Number(f.avgPrice * f.units) || val
+                    const retPct = inv > 0 ? +(((val - inv) / inv) * 100).toFixed(2) : 0
+                    return (
                       <tr key={i}>
-                        <td style={{ fontWeight: 600 }}>{t.date}</td>
-                        <td>{t.desc}</td>
+                        <td style={{ fontWeight: 600 }}>{f.name || f.scheme || f.symbol}</td>
+                        <td style={{ fontFamily: 'monospace' }}>{Number(f.units || 0).toFixed(2)}</td>
+                        <td style={{ fontWeight: 600 }}>₹{Number(f.currentPrice || f.nav || 0).toFixed(2)}</td>
+                        <td style={{ fontWeight: 700 }}>{fmtINR(val)}</td>
                         <td>
                           <span className="badge" style={{
-                            background: t.category === 'Income' ? '#dcfce7' : t.category === 'Investment' ? '#dbeafe' : t.category === 'Insurance' ? '#f3e8ff' : t.category === 'Utility' ? '#fef3c7' : '#fee2e2',
-                            color: t.category === 'Income' ? '#16a34a' : t.category === 'Investment' ? '#1d4ed8' : t.category === 'Insurance' ? '#7c3aed' : t.category === 'Utility' ? '#92400e' : '#dc2626',
+                            background: retPct >= 0 ? '#dcfce7' : '#fee2e2',
+                            color: retPct >= 0 ? '#16a34a' : '#dc2626',
                             fontWeight: 700
-                          }}>{t.category}</span>
-                        </td>
-                        <td style={{ fontWeight: 800, color: t.type === 'CR' ? '#16a34a' : '#dc2626' }}>
-                          {t.type === 'CR' ? '+' : '−'}{fmtINR(t.amount)}
+                          }}>
+                            {retPct >= 0 ? `+${retPct}%` : `${retPct}%`}
+                          </span>
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.9rem', borderRadius: '8px', background: 'linear-gradient(90deg, #ecfdf5, #dcfce7)', display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '0.78rem', color: '#475569' }}>Total MF Investment</div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0B1C3B' }}>{fmtINR(mfInvested)}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', color: '#475569' }}>Unrealized Gain/Loss</div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: mfValue >= mfInvested ? '#16a34a' : '#dc2626' }}>
+                {mfValue >= mfInvested ? '+' : ''}{fmtINR(mfValue - mfInvested)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Stock & Equity Portfolio Card */}
+        <div className="card">
+          <div className="flex-between mb-1">
+            <h3>📊 Stock & Equity Portfolio</h3>
+            <span className="badge" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 700 }}>
+              {stocks.length} {stocks.length === 1 ? 'Stock' : 'Stocks'}
+            </span>
+          </div>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Stock / Company</th>
+                  <th>Qty</th>
+                  <th>Avg Price</th>
+                  <th>CMP</th>
+                  <th>Current Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {stocks.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" style={{ textAlign: 'center', color: '#64748b', padding: '1.5rem 0.5rem', fontStyle: 'italic' }}>
+                      No active equity/stock holdings in your Demat portfolio.
+                    </td>
+                  </tr>
+                ) : (
+                  stocks.map((s, i) => {
+                    const val = Number(s.totalValue) || Number(s.currentPrice * s.units) || 0
+                    return (
+                      <tr key={i}>
+                        <td style={{ fontWeight: 600 }}>{s.name || s.symbol}</td>
+                        <td style={{ fontFamily: 'monospace' }}>{s.units || s.qty || 0}</td>
+                        <td style={{ fontWeight: 600 }}>₹{Number(s.avgPrice || 0).toFixed(2)}</td>
+                        <td style={{ fontWeight: 600 }}>₹{Number(s.currentPrice || 0).toFixed(2)}</td>
+                        <td style={{ fontWeight: 700, color: '#0B1C3B' }}>{fmtINR(val)}</td>
+                      </tr>
+                    )
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.9rem', borderRadius: '8px', background: 'linear-gradient(90deg, #ecfdf5, #dcfce7)', display: 'flex', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '0.78rem', color: '#475569' }}>Total Equity Investment</div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0B1C3B' }}>{fmtINR(stockInvested)}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '0.78rem', color: '#475569' }}>Unrealized Gain/Loss</div>
+              <div style={{ fontWeight: 800, fontSize: '1.05rem', color: stockValue >= stockInvested ? '#16a34a' : '#dc2626' }}>
+                {stockValue >= stockInvested ? '+' : ''}{fmtINR(stockValue - stockInvested)}
               </div>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
+
+      {/* Asset Allocation & Support */}
+      <div className="dash-grid-cols-2 mt-1">
+        <div className="card">
+          <div className="flex-between mb-1">
+            <h3>💼 Portfolio Allocation</h3>
+            <span className="badge" style={{ background: '#dbeafe', color: '#1d4ed8', fontWeight: 700 }}>
+              MF & Stocks Only
+            </span>
+          </div>
+          <div style={{ padding: '0.5rem 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.88rem' }}>
+              <span style={{ fontWeight: 600, color: '#0B1C3B' }}>📈 Mutual Funds</span>
+              <span style={{ fontWeight: 700, color: '#F39C12' }}>
+                {totalValue > 0 ? `${((mfValue / totalValue) * 100).toFixed(1)}%` : '0%'} ({fmtINR(mfValue)})
+              </span>
+            </div>
+            <div style={{ height: '10px', background: '#f1f5f9', borderRadius: '5px', overflow: 'hidden', marginBottom: '1.2rem' }}>
+              <div style={{
+                height: '100%',
+                width: `${totalValue > 0 ? (mfValue / totalValue) * 100 : 0}%`,
+                background: 'linear-gradient(90deg, #F39C12, #f59e0b)',
+                borderRadius: '5px'
+              }} />
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.4rem', fontSize: '0.88rem' }}>
+              <span style={{ fontWeight: 600, color: '#0B1C3B' }}>📊 Stocks & Equity</span>
+              <span style={{ fontWeight: 700, color: '#25D366' }}>
+                {totalValue > 0 ? `${((stockValue / totalValue) * 100).toFixed(1)}%` : '0%'} ({fmtINR(stockValue)})
+              </span>
+            </div>
+            <div style={{ height: '10px', background: '#f1f5f9', borderRadius: '5px', overflow: 'hidden', marginBottom: '1.2rem' }}>
+              <div style={{
+                height: '100%',
+                width: `${totalValue > 0 ? (stockValue / totalValue) * 100 : 0}%`,
+                background: 'linear-gradient(90deg, #25D366, #16a34a)',
+                borderRadius: '5px'
+              }} />
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '0.75rem',
+              marginTop: '1rem',
+              paddingTop: '0.75rem',
+              borderTop: '1px solid #f1f5f9'
+            }}>
+              <div style={{ padding: '0.6rem 0.8rem', background: '#fffbeb', borderRadius: '8px' }}>
+                <div style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600 }}>Active SIPs</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#b45309' }}>{mutualFunds.length}</div>
+              </div>
+              <div style={{ padding: '0.6rem 0.8rem', background: '#f0fdf4', borderRadius: '8px' }}>
+                <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>Stock Holdings</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d' }}>{stocks.length}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="card">
+          <h3 className="mb-1">💬 Client Support & Queries</h3>
+          <div style={{ marginTop: '0.5rem' }}>
+            <SupportTickets tickets={[]} />
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Orders / Transactions */}
+      <div className="card mt-1">
+        <div className="flex-between mb-1">
+          <h3>📒 Recent Mutual Funds & Stocks Orders</h3>
+          <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <button className="btn btn-sm btn-outline"><FontAwesomeIcon icon={faFilePdf} /> Statement PDF</button>
+            <button className="btn btn-sm btn-outline"><FontAwesomeIcon icon={faFileExcel} /> Export Excel</button>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Order Particulars</th>
+                <th>Type</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recentTxns.length === 0 ? (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: 'center', color: '#64748b', padding: '1.5rem', fontStyle: 'italic' }}>
+                    No recent mutual fund or stock transactions recorded.
+                  </td>
+                </tr>
+              ) : (
+                recentTxns.map((t, i) => (
+                  <tr key={i}>
+                    <td style={{ fontWeight: 600 }}>{t.date}</td>
+                    <td>{t.desc || t.particulars || t.scheme}</td>
+                    <td>
+                      <span className="badge" style={{
+                        background: (t.type === 'BUY' || t.type === 'SIP') ? '#dcfce7' : '#fee2e2',
+                        color: (t.type === 'BUY' || t.type === 'SIP') ? '#16a34a' : '#dc2626',
+                        fontWeight: 700
+                      }}>{t.type || 'ORDER'}</span>
+                    </td>
+                    <td style={{ fontWeight: 800, color: '#0B1C3B' }}>
+                      {fmtINR(t.amount)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const RoleHeader = ({ title, subtitle, icon, activeRoleView, onSwitchRoleView }) => {
   const user = useAuthStore((s) => s.user)

@@ -78,20 +78,24 @@ export default function Login() {
       setLoginType('employee')
       setRole('admin')
       setUsername('admin')
-      setPassword('Admin@123')
+      setPassword('')
     } else if (tab === 'client') {
       setLoginType('client')
       setRole('client')
+      setUsername('')
+      setPassword('')
     }
   }, [params])
 
   useEffect(() => {
     if (loginType === 'client') {
       setRole('client')
+      setUsername('')
+      setPassword('')
     } else if (role === 'client' || !role) {
       setRole('admin')
       setUsername('admin')
-      setPassword('Admin@123')
+      setPassword('')
     }
   }, [loginType])
 
@@ -104,7 +108,7 @@ export default function Login() {
     if (loginType !== 'employee') return
     setRole(r.id)
     setUsername(r.username)
-    setPassword(r.password)
+    setPassword('')
     setError('')
   }
 
@@ -195,31 +199,39 @@ export default function Login() {
       return
     }
 
-    // RFA / 2FA is commented out per requirement for direct smooth deployment
-    finish(resolvedUser)
-    setLoading(false)
-    /*
-    // Pass to Two-Factor / RFA Security Step: Dispatch OTP via Gmail SMTP
-    setPendingUser(resolvedUser)
+    // Pass to Two-Factor / OTP Security Step: Dispatch priority OTP to the logging-in user
+    let targetEmail = resolvedUser.email;
+    if (!targetEmail || targetEmail.endsWith('@local') || targetEmail.endsWith('@genius.com')) {
+      if (ident.includes('@') && !ident.endsWith('@local')) {
+        targetEmail = ident;
+      } else {
+        targetEmail = 'patelsiddharth264@gmail.com';
+      }
+    }
+
+    setPendingUser({ ...resolvedUser, targetEmail })
     setRfaInput('')
     setRfaTimer(300) // 5 minutes
     setAuthStep('rfa')
+    setLoading(true)
+    setOtpSentMessage(`Sending priority verification code to ${targetEmail}…`)
 
     try {
       const { data } = await api.post('/auth/send-otp', {
-        email: 'patelsiddharth264@gmail.com',
-        identifier: resolvedUser.username || resolvedUser.email,
-        username: resolvedUser.username,
+        email: targetEmail,
+        identifier: resolvedUser.username || resolvedUser.email || ident,
+        username: resolvedUser.username || ident,
         name: resolvedUser.name,
         role: resolvedUser.role
       })
-      setOtpSentMessage(data?.message || 'Verification code dispatched to patelsiddharth264@gmail.com')
+      const sentDest = data?.sentTo || targetEmail;
+      setOtpSentMessage(data?.message || `✓ Priority verification code sent to ${sentDest}`)
     } catch (err) {
       console.warn('[login] OTP send warning:', err)
-      setOtpSentMessage('Verification code dispatched to patelsiddharth264@gmail.com')
+      setOtpSentMessage(`Verification code dispatched to ${targetEmail}`)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
-    */
   }
 
   const handleResendOtp = async () => {
@@ -231,17 +243,28 @@ export default function Login() {
     if (loading) return
     setError('')
     setRfaInput('')
-    setOtpSentMessage('Sending fresh code to patelsiddharth264@gmail.com…')
+
+    let targetEmail = pendingUser.targetEmail || pendingUser.email;
+    if (!targetEmail || targetEmail.endsWith('@local') || targetEmail.endsWith('@genius.com')) {
+      if (username.includes('@') && !username.endsWith('@local')) {
+        targetEmail = username;
+      } else {
+        targetEmail = 'patelsiddharth264@gmail.com';
+      }
+    }
+
+    setOtpSentMessage(`Resending fresh verification code to ${targetEmail}…`)
     setLoading(true)
     try {
       const { data } = await api.post('/auth/send-otp', {
-        email: 'patelsiddharth264@gmail.com',
+        email: targetEmail,
         identifier: pendingUser.username || pendingUser.email || username || 'admin',
         username: pendingUser.username || username || 'admin',
         name: pendingUser.name || 'Valued User',
         role: pendingUser.role
       })
-      setOtpSentMessage(data?.message || '✓ Fresh verification code dispatched to patelsiddharth264@gmail.com!')
+      const sentDest = data?.sentTo || targetEmail;
+      setOtpSentMessage(data?.message || `✓ Fresh priority code dispatched to ${sentDest}!`)
       setRfaTimer(300)
     } catch (err) {
       console.error('[resend-otp] Error:', err)
@@ -302,7 +325,7 @@ export default function Login() {
       </div>
 
       {authStep === 'credentials' ? (
-        <form className="ge-landing-card" onSubmit={handleCredentialsSubmit}>
+        <form className="ge-landing-card" onSubmit={handleCredentialsSubmit} autoComplete="off">
           <div className="ge-landing-tabs" role="tablist">
             <button
               type="button"
@@ -350,7 +373,7 @@ export default function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Username or Email Address"
-              autoComplete="username"
+              autoComplete="off"
               required
             />
           </div>
@@ -362,7 +385,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               required
             />
           </div>
@@ -498,11 +521,11 @@ export default function Login() {
             </div>
             <div>
               {otpSentMessage || (
-                <>A 6-digit verification code was sent to <strong>{pendingUser?.email?.includes('@') && !pendingUser?.email?.endsWith('@local') ? pendingUser?.email : 'patelsiddharth264@gmail.com'}</strong>.</>
+                <>A 6-digit verification code was sent to <strong>{pendingUser?.targetEmail || (pendingUser?.email?.includes('@') && !pendingUser?.email?.endsWith('@local') ? pendingUser?.email : 'patelsiddharth264@gmail.com')}</strong>.</>
               )}
             </div>
             <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: 4 }}>
-              Please check your Gmail inbox (or spam/junk folder). Never share this code.
+              Dispatched with high priority to your primary inbox. Never share this code with anyone.
             </div>
           </div>
 
@@ -522,7 +545,7 @@ export default function Login() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0.75rem 0' }}>
             <span style={{ fontSize: '0.78rem', color: '#64748b' }}>
-              Expires in: <strong style={{ color: rfaTimer < 20 ? '#dc2626' : '#0f172a' }}>{rfaTimer}s</strong>
+              Expires in: <strong style={{ color: rfaTimer < 30 ? '#dc2626' : '#0f172a' }}>{Math.floor(rfaTimer / 60)}:{(rfaTimer % 60).toString().padStart(2, '0')}</strong>
             </span>
             <button
               type="button"

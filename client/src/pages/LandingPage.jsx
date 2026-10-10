@@ -1957,16 +1957,6 @@ export default function LandingPage() {
         </div>
     </section>
 
-    <!-- Floating Contact Buttons -->
-    <div id="floating-contacts" class="floating-contacts">
-        <a href="https://wa.me/917317064063?text=Hello%20Genius%20Enterprises,%20I%20would%20like%20to%20know%20more%20about%20your%20services." target="_blank" class="floating-btn whatsapp-float" title="WhatsApp Us">
-            <i class="fab fa-whatsapp"></i>
-        </a>
-        <a href="tel:+917317064063" class="floating-btn phone-float" title="Call Us">
-            <i class="fas fa-phone-alt"></i>
-        </a>
-    </div>
-
     <!-- Get In Touch Section -->
     <section id="contact" class="content-section">
         <div class="content-wrapper text-center" style="text-align: center; flex-direction: column;">
@@ -2003,10 +1993,10 @@ export default function LandingPage() {
                     <span class="contact-subtext">Sunday by appointment only</span>
                 </div>
 
-                <a href="https://maps.app.goo.gl/BBG3dgjjcGwnEo4r9" target="_blank" rel="noopener noreferrer" class="large-contact-btn office" style={{ textDecoration: 'none' }}>
+                <a href="https://maps.app.goo.gl/BBG3dgjjcGwnEo4r9" target="_blank" rel="noopener noreferrer" class="large-contact-btn office" style="text-decoration: none;">
                     <i class="fas fa-map-marker-alt"></i> 
                     <span class="contact-title">Our Office</span>
-                    <span class="contact-detail" style={{ fontSize: '0.82rem', lineHeight: '1.3' }}>SH 11/50 D-L PATEL NAGAR COLONY SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</span>
+                    <span class="contact-detail" style="font-size: 0.82rem; line-height: 1.3;">SH 11/50 D-L PATEL NAGAR COLONY SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</span>
                     <span class="contact-subtext">Click to open in Google Maps</span>
                 </a>
             </div>
@@ -2040,7 +2030,7 @@ export default function LandingPage() {
                 <h3>Planning</h3>
                 <ul class="footer-links">
                     <li><a href="#financial">Financial Planning</a></li>
-                    <li><a href="#insurance">Insurance Support</a></li>
+                    <li><a href="#mutual-funds">Wealth & SIP Growth</a></li>
                     <li><a href="#sif">Specialized Funds</a></li>
                     <li><a href="#contact">Consult an Expert</a></li>
                 </ul>
@@ -2049,7 +2039,7 @@ export default function LandingPage() {
             <div class="footer-column">
                 <h3>Contact Us</h3>
                 <ul class="footer-contact">
-                    <li><i class="fas fa-map-marker-alt"></i> <a href="https://maps.app.goo.gl/BBG3dgjjcGwnEo4r9" target="_blank" rel="noopener noreferrer" style={{color: '#e6eef8', textDecoration: 'none'}}>SH 11/50 D-L PATEL NAGAR COLONY SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</a></li>
+                    <li><i class="fas fa-map-marker-alt"></i> <a href="https://maps.app.goo.gl/BBG3dgjjcGwnEo4r9" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: none;">SH 11/50 D-L PATEL NAGAR COLONY SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</a></li>
                     <li><i class="fas fa-phone-alt"></i> +91-7317064063</li>
                     <li><i class="fas fa-envelope"></i> geniusenterprises189837@gmail.com</li>
                 </ul>
@@ -2061,20 +2051,18 @@ export default function LandingPage() {
         </div>
     </footer>
 
-    <!-- Floating WhatsApp FAB (auto shows/hides on scroll via existing JS handler) -->
-    <div id="floating-contacts">
-        <a href="https://wa.me/917317064063?text=Hello%20Genius%20Enterprises%2C%20I%20would%20like%20to%20inquire%20about%20your%20financial%20services%20and%20investment%20plans."
-           target="_blank"
-           rel="noopener noreferrer"
-           class="floating-btn whatsapp-float"
-           title="Chat with us on WhatsApp">
+    <!-- Floating Action Buttons: Up Arrow, WhatsApp, Phone Call -->
+    <div id="floating-contacts" class="floating-contacts">
+        <button id="scrollTopBtn" class="floating-btn scroll-top-btn" title="Back to top" aria-label="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        <a href="https://wa.me/917317064063?text=Hello%20Genius%20Enterprises,%20I%20would%20like%20to%20know%20more%20about%20your%20services." target="_blank" rel="noopener noreferrer" class="floating-btn whatsapp-float" title="Chat on WhatsApp" aria-label="Chat on WhatsApp">
             <i class="fab fa-whatsapp"></i>
         </a>
+        <a href="tel:+917317064063" class="floating-btn phone-float" title="Call Us" aria-label="Call Us">
+            <i class="fas fa-phone-alt"></i>
+        </a>
     </div>
-
-    <button id="scrollTopBtn" class="scroll-top-btn" title="Go to top">
-        <i class="fas fa-arrow-up"></i>
-    </button>
 
     
 <!-- Code injected by live-server -->

@@ -38,73 +38,94 @@ const getTransporter = () => {
   return cachedTransporter;
 };
 
-const FROM_HEADER = () => process.env.SMTP_FROM || `"Genius Enterprises" <${process.env.SMTP_USER || 'patelsiddharth264@gmail.com'}>`;
+const FROM_HEADER = () => process.env.SMTP_FROM || `"Genius Enterprises Security" <${process.env.SMTP_USER || 'patelsiddharth264@gmail.com'}>`;
 
 /**
- * Send OTP verification email
+ * Send OTP verification email with high priority and anti-spam deliverability headers
  */
 async function sendOtpEmail({ to, otp, userName = 'Valued User' }) {
   const transporter = getTransporter();
   const recipient = to || process.env.ADMIN_NOTIFICATION_EMAIL || 'patelsiddharth264@gmail.com';
+  const cleanUserName = String(userName || 'Valued User').trim();
+  const fromAddress = FROM_HEADER();
+  const replyTo = process.env.SMTP_USER || 'patelsiddharth264@gmail.com';
 
   const html = `
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Genius Enterprises Verification Code</title>
   <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 24px; color: #1e293b; }
-    .container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
-    .header { background: linear-gradient(135deg, #0B1C3B 0%, #14305C 100%); padding: 28px 24px; text-align: center; }
-    .header h1 { margin: 0; color: #ffffff; font-size: 22px; letter-spacing: 1px; font-weight: 700; }
-    .header p { margin: 4px 0 0 0; color: #94a3b8; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b; -webkit-font-smoothing: antialiased; }
+    .container { max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+    .header { background: #0B1C3B; padding: 26px 24px; text-align: center; }
+    .header h1 { margin: 0; color: #ffffff; font-size: 20px; letter-spacing: 1.5px; font-weight: 800; }
+    .header p { margin: 4px 0 0 0; color: #94a3b8; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; font-weight: 600; }
     .content { padding: 32px 28px; }
-    .greeting { font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 12px; }
+    .greeting { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 12px; }
     .text { font-size: 14px; line-height: 1.6; color: #475569; margin: 0 0 20px 0; }
-    .otp-box { background: #f8fafc; border: 2px dashed #D12020; border-radius: 10px; padding: 18px; text-align: center; margin: 24px 0; }
-    .otp-label { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 6px; }
-    .otp-code { font-size: 34px; font-weight: 800; letter-spacing: 8px; color: #D12020; font-family: 'Courier New', monospace; }
-    .notice { font-size: 12px; color: #64748b; background: #fff7ed; border-left: 3px solid #f97316; padding: 10px 14px; border-radius: 4px; margin: 20px 0 0 0; }
-    .footer { background: #f1f5f9; padding: 18px 24px; text-align: center; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+    .otp-box { background: #f8fafc; border: 2px dashed #D12020; border-radius: 10px; padding: 20px 16px; text-align: center; margin: 24px 0; }
+    .otp-label { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 1.5px; font-weight: 700; margin-bottom: 8px; }
+    .otp-code { font-size: 36px; font-weight: 900; letter-spacing: 10px; color: #D12020; font-family: 'Courier New', Courier, monospace; }
+    .validity { font-size: 12px; color: #64748b; margin-top: 8px; font-weight: 600; }
+    .notice { font-size: 12px; color: #64748b; background: #f1f5f9; border-left: 3px solid #0B1C3B; padding: 12px 14px; border-radius: 4px; margin: 24px 0 0 0; line-height: 1.5; }
+    .footer { background: #f8fafc; padding: 20px 24px; text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; line-height: 1.6; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <h1>GENIUS ENTERPRISES</h1>
-      <p>Wealth Management &amp; Advisory</p>
+      <p>Security &amp; Identity Verification</p>
     </div>
     <div class="content">
-      <div class="greeting">Hello ${userName},</div>
+      <div class="greeting">Hello ${cleanUserName},</div>
       <p class="text">
-        You requested a Two-Factor Authentication (2FA) verification code to access your Genius Enterprises portal account.
+        We received a request to sign in to your <strong>Genius Enterprises Portal</strong> account. Use the one-time verification code below to complete authentication:
       </p>
       <div class="otp-box">
-        <div class="otp-label">Your One-Time Password (OTP)</div>
+        <div class="otp-label">One-Time Verification Code</div>
         <div class="otp-code">${otp}</div>
+        <div class="validity">Expires in 5 minutes • Single use only</div>
       </div>
-      <p class="text" style="font-size: 13px;">
-        This code is valid for <strong>5 minutes</strong>. For security reasons, never share this code or your account password with anyone.
+      <p class="text" style="font-size: 13px; color: #64748b;">
+        <strong>Security Tip:</strong> Genius Enterprises personnel will never ask you for this code. Do not share it with anyone.
       </p>
       <div class="notice">
-        If you did not initiate this login request, please contact our support team immediately at <a href="mailto:geniusenterprises189837@gmail.com" style="color: #D12020;">geniusenterprises189837@gmail.com</a>.
+        If you did not request this verification code, please ignore this email or reach our compliance desk at <a href="mailto:geniusenterprises189837@gmail.com" style="color: #0B1C3B; text-decoration: underline;">geniusenterprises189837@gmail.com</a>.
       </div>
     </div>
     <div class="footer">
       © ${new Date().getFullYear()} Genius Enterprises. All rights reserved.<br/>
-      SEBI Registered Financial Advisory &amp; Wealth Portal
+      SEBI Registered Financial Advisory &amp; Wealth Management Portal<br/>
+      This is an automated priority transactional security dispatch.
     </div>
   </div>
 </body>
 </html>
   `;
 
+  const textBody = `Genius Enterprises - Identity Verification\n\nHello ${cleanUserName},\n\nYour one-time verification code is:\n\n${otp}\n\nThis code is valid for 5 minutes and can only be used once.\n\nSecurity Tip: Never share this code with anyone. Genius Enterprises will never call or ask for your verification code.\n\nIf you did not initiate this login request, please ignore this email or contact support at geniusenterprises189837@gmail.com.\n\n© ${new Date().getFullYear()} Genius Enterprises. All rights reserved.`;
+
+  // Industry-standard transactional headers that signal priority 2FA delivery to Gmail, Outlook, Apple Mail
   return transporter.sendMail({
-    from: FROM_HEADER(),
+    from: fromAddress,
     to: recipient,
-    subject: `[Genius Enterprises] Your Verification OTP: ${otp}`,
-    text: `Your Genius Enterprises verification OTP is ${otp}. Valid for 5 minutes. Do not share with anyone.`,
-    html,
+    replyTo: replyTo,
+    subject: `${otp} is your Genius Enterprises verification code`,
+    text: textBody,
+    html: html,
+    headers: {
+      'X-Priority': '1',
+      'X-MSMail-Priority': 'High',
+      'Importance': 'high',
+      'Priority': 'urgent',
+      'X-Auto-Response-Suppress': 'OOF, AutoReply',
+      'Auto-Submitted': 'auto-generated',
+      'X-Entity-Ref-ID': `otp-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`,
+    },
   });
 }
 
