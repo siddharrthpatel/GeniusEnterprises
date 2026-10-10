@@ -8,7 +8,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import api from '../api'
 import { useAuthStore, saveLocalUser } from '../store/auth'
-import { validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN } from '../utils/format'
+import { validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN, validateStrongPassword } from '../utils/format'
 
 const features = [
   { icon: faShieldHalved,  text: 'SEBI Registered & Regulated' },
@@ -73,9 +73,7 @@ export default function ClientSignup() {
         if (!em.test(val.trim())) return 'Enter a valid email address'
         return ''
       case 'password':
-        if (!val) return 'Password is required'
-        if (val.length < 6) return 'Password must be at least 6 characters'
-        return ''
+        return validateStrongPassword(val).error
       case 'confirm':
         if (!val) return 'Please confirm your password'
         if (val !== frm.password) return 'Passwords do not match'
@@ -262,8 +260,9 @@ export default function ClientSignup() {
                 <label>Password</label>
                 <div className="ge-input-wrap">
                   <i className="fas fa-lock ge-input-icon"></i>
-                  <input type="password" value={form.password} onChange={change('password')} onBlur={onBlur('password')} placeholder="Min 6 chars" required minLength={6} />
+                  <input type="password" value={form.password} onChange={change('password')} onBlur={onBlur('password')} placeholder="Min 8 chars (e.g. Pass@123)" required minLength={8} />
                 </div>
+                <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>8+ chars with capital, small, number & symbol</div>
                 {touched.password && errors.password && <div className="ge-field-error" style={{ color: '#C0392B', fontSize: '0.75rem', marginTop: '4px' }}>{errors.password}</div>}
               </div>
               <div className="ge-form-group">

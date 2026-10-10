@@ -6,6 +6,9 @@ export default defineConfig({
   esbuild: {
     jsx: 'automatic'
   },
+  build: {
+    sourcemap: false
+  },
   server: {
     port: 5173,
     host: true,

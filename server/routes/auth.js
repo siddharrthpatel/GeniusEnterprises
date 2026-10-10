@@ -24,8 +24,15 @@ const ACCESS_TOKEN_EXPIRY = process.env.JWT_EXPIRY || '15m';
 const REFRESH_MAX_AGE_MS =
   parseInt(process.env.REFRESH_TOKEN_DAYS || '7', 10) * 24 * 60 * 60 * 1000;
 
-const PASSWORD_RE =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const isStrongPassword = (val) => {
+  if (typeof val !== 'string' || val.length < 8 || val.length > 128) return false;
+  return (
+    /[a-z]/.test(val) &&
+    /[A-Z]/.test(val) &&
+    /\d/.test(val) &&
+    /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(val)
+  );
+};
 
 if (!JWT_SECRET || JWT_SECRET.length < 32) {
   const msg =
@@ -96,14 +103,18 @@ const passwordChain = (field = 'password') =>
     .withMessage(`${field} must be between 4-128 characters`);
 
 const strongPasswordChain = (field = 'password') =>
-  passwordChain(field).custom((value) => {
-    if (isProd && !PASSWORD_RE.test(value)) {
-      throw new Error(
-        `${field} must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special character`,
-      );
-    }
-    return true;
-  });
+  body(field)
+    .isString()
+    .isLength({ min: 8, max: 128 })
+    .withMessage(`${field} must be at least 8 characters`)
+    .custom((value) => {
+      if (!isStrongPassword(value)) {
+        throw new Error(
+          `${field} must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special symbol (min 8 chars)`,
+        );
+      }
+      return true;
+    });
 
 router.post(
   '/login',
@@ -215,7 +226,7 @@ const saveActiveOtps = (list) => {
   } catch (_) {}
 };
 
-router.post('/send-otp', async (req, res) => {
+router.post('/send-otp', authLimiter, strictLimiter, async (req, res) => {
   try {
     const rawEmail = String(req.body.email || req.body.identifier || '').trim();
     const username = String(req.body.username || '').trim();
@@ -296,7 +307,7 @@ router.post('/send-otp', async (req, res) => {
   }
 });
 
-router.post('/verify-otp', async (req, res) => {
+router.post('/verify-otp', authLimiter, strictLimiter, async (req, res) => {
   const email = String(req.body.email || req.body.identifier || '').trim().toLowerCase();
   const username = String(req.body.username || '').trim().toLowerCase();
   const requestedRole = String(req.body.role || '').trim().toLowerCase();
@@ -404,8 +415,8 @@ router.put('/profile', authenticate, async (req, res, next) => {
     if (pan !== undefined) patch.pan = String(pan).trim();
     if (dob !== undefined) patch.dob = String(dob).trim();
     if (password) {
-      if (password.length < 4 || password.length > 128) {
-        return res.status(400).json({ error: 'Password must be 4-128 characters' });
+      if (!isStrongPassword(password)) {
+        return res.status(400).json({ error: 'Password must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special symbol (min 8 chars)' });
       }
       patch.password = await bcrypt.hash(password, BCRYPT_ROUNDS);
     }

@@ -171,13 +171,62 @@ export const downloadExcel = (headers, rows, filename) => {
   downloadCSV(headers, rows, filename.endsWith('.xls') ? filename : filename + '.xls')
 }
 
+/**
+ * Validate strong password for customers and users:
+ * - Minimum 8 characters
+ * - At least one uppercase letter (A-Z)
+ * - At least one lowercase letter (a-z)
+ * - At least one digit (0-9)
+ * - At least one special symbol (!@#$%^&* etc.)
+ * Returns { valid: boolean, error: string }
+ */
+export function validateStrongPassword(rawInput) {
+  if (rawInput === null || rawInput === undefined) {
+    return { valid: false, error: 'Password is required' }
+  }
+  const pwd = String(rawInput)
+  if (!pwd) {
+    return { valid: false, error: 'Password is required' }
+  }
+  if (pwd.length < 8) {
+    return { valid: false, error: 'Password must be at least 8 characters long' }
+  }
+  if (!/[A-Z]/.test(pwd)) {
+    return { valid: false, error: 'Password must include at least 1 uppercase letter (A-Z)' }
+  }
+  if (!/[a-z]/.test(pwd)) {
+    return { valid: false, error: 'Password must include at least 1 lowercase letter (a-z)' }
+  }
+  if (!/\d/.test(pwd)) {
+    return { valid: false, error: 'Password must include at least 1 number (0-9)' }
+  }
+  if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(pwd)) {
+    return { valid: false, error: 'Password must include at least 1 special symbol (e.g. @, #, $, %, !)' }
+  }
+  return { valid: true, error: '' }
+}
+
+/**
+ * Sanitize and escape HTML special characters to prevent Cross-Site Scripting (XSS).
+ */
+export function escapeHTML(str) {
+  if (str === null || str === undefined) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 export const printHTML = (title, contentHTML) => {
   const printWin = window.open('', '_blank', 'width=900,height=700')
   if (!printWin) {
     alert('Please allow pop-ups to generate PDF report')
     return
   }
-  printWin.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
+  const safeTitle = escapeHTML(title)
+  printWin.document.write(`<!DOCTYPE html><html><head><title>${safeTitle}</title>
     <style>
       * { box-sizing: border-box; font-family: Arial, sans-serif; }
       body { margin: 30px; color: #111; }
@@ -194,7 +243,7 @@ export const printHTML = (title, contentHTML) => {
       .danger { color: #dc2626; }
       @media print { body { margin: 15mm; } }
     </style></head><body>
-    <h1>Genius Enterprises — ${title}</h1>
+    <h1>Genius Enterprises — ${safeTitle}</h1>
     <div class="meta">Generated: ${new Date().toLocaleString('en-IN')}</div>
     ${contentHTML}
     <div class="footnote">This is a system-generated report from Genius Enterprises. Confidential — For authorized use only.</div>
@@ -205,12 +254,12 @@ export const printHTML = (title, contentHTML) => {
 }
 
 export const rowsToHTMLTable = (headers, rows, { totalsRow } = {}) => {
-  let html = '<table><thead><tr>' + headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>'
+  let html = '<table><thead><tr>' + headers.map(h => `<th>${escapeHTML(h)}</th>`).join('') + '</tr></thead><tbody>'
   rows.forEach(r => {
-    html += '<tr>' + r.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>'
+    html += '<tr>' + r.map(c => `<td>${escapeHTML(c ?? '')}</td>`).join('') + '</tr>'
   })
   if (totalsRow) {
-    html += '<tr class="summary-row">' + totalsRow.map(c => `<td>${c ?? ''}</td>`).join('') + '</tr>'
+    html += '<tr class="summary-row">' + totalsRow.map(c => `<td>${escapeHTML(c ?? '')}</td>`).join('') + '</tr>'
   }
   html += '</tbody></table>'
   return html

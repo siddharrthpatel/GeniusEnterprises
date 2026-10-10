@@ -75,12 +75,17 @@ export default function Login() {
     }
   }, [authStep, rfaTimer])
 
+  const refreshCaptcha = () => {
+    setCaptchaCode(generateCaptchaCode())
+    setCaptchaInput('')
+  }
+
   useEffect(() => {
     const tab = params.get('tab')
     if (tab === 'employee') {
       setLoginType('employee')
       setRole('admin')
-      setUsername('admin')
+      setUsername('')
       setPassword('')
     } else if (tab === 'client') {
       setLoginType('client')
@@ -88,31 +93,28 @@ export default function Login() {
       setUsername('')
       setPassword('')
     }
+    refreshCaptcha()
   }, [params])
 
   useEffect(() => {
+    setUsername('')
+    setPassword('')
+    setError('')
+    refreshCaptcha()
     if (loginType === 'client') {
       setRole('client')
-      setUsername('')
-      setPassword('')
     } else if (role === 'client' || !role) {
       setRole('admin')
-      setUsername('admin')
-      setPassword('')
     }
   }, [loginType])
-
-  const refreshCaptcha = () => {
-    setCaptchaCode(generateCaptchaCode())
-    setCaptchaInput('')
-  }
 
   const pickRole = (r) => {
     if (loginType !== 'employee') return
     setRole(r.id)
-    setUsername(r.username)
+    setUsername('')
     setPassword('')
     setError('')
+    refreshCaptcha()
   }
 
   const finish = (u) => {
@@ -335,7 +337,14 @@ export default function Login() {
               role="tab"
               aria-selected={loginType === 'client'}
               className={'ge-landing-tab' + (loginType === 'client' ? ' on' : '')}
-              onClick={() => setLoginType('client')}
+              onClick={() => {
+                setLoginType('client')
+                setRole('client')
+                setUsername('')
+                setPassword('')
+                setError('')
+                refreshCaptcha()
+              }}
             >
               <FontAwesomeIcon icon={faUser} /> CLIENT PORTAL
             </button>
@@ -344,7 +353,14 @@ export default function Login() {
               role="tab"
               aria-selected={loginType === 'employee'}
               className={'ge-landing-tab' + (loginType === 'employee' ? ' on' : '')}
-              onClick={() => setLoginType('employee')}
+              onClick={() => {
+                setLoginType('employee')
+                setRole('admin')
+                setUsername('')
+                setPassword('')
+                setError('')
+                refreshCaptcha()
+              }}
             >
               <FontAwesomeIcon icon={faBriefcase} /> EMPLOYEE PORTAL
             </button>

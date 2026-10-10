@@ -16,7 +16,7 @@ import {
   faArrowsRotate
 } from '@fortawesome/free-solid-svg-icons'
 import { useAuthStore, saveLocalUser, getLocalUsersList, deleteLocalUser } from '../store/auth'
-import { initials, roleBadgeClass, roleLabel, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN } from '../utils/format'
+import { initials, roleBadgeClass, roleLabel, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN, validateStrongPassword } from '../utils/format'
 import api from '../api'
 
 const emptyForm = {
@@ -130,8 +130,9 @@ export default function AdminUsers() {
       setPwdError('Please select a user')
       return
     }
-    if (!newPassword || newPassword.length < 8) {
-      setPwdError('Password must be at least 8 characters long')
+    const pwRes = validateStrongPassword(newPassword)
+    if (!pwRes.valid) {
+      setPwdError(pwRes.error)
       return
     }
 
@@ -215,6 +216,10 @@ export default function AdminUsers() {
     try {
       const payload = { ...form }
       if (!editing && !payload.password) { setError('Password is required for new users'); return }
+      if (payload.password) {
+        const pwRes = validateStrongPassword(payload.password)
+        if (!pwRes.valid) { setError(pwRes.error); return }
+      }
       if (editing && !payload.password) delete payload.password
 
       if (payload.phone) {
@@ -393,7 +398,7 @@ export default function AdminUsers() {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Password {editing && <span style={{ color: '#888', fontWeight: 400, fontSize: '0.75rem' }}> (leave blank to keep)</span>}</label>
-                    <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} {...(editing ? {} : { required: true })} />
+                    <input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="Min 8 chars (e.g. Pass@123)" {...(editing ? {} : { required: true, minLength: 8 })} />
                   </div>
                   <div className="form-group">
                     <label>Phone</label>

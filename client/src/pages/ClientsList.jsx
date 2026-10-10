@@ -18,7 +18,7 @@ import {
   faTriangleExclamation
 } from '@fortawesome/free-solid-svg-icons'
 import { useAuthStore, saveLocalUser, getLocalUsersList, deleteLocalUser } from '../store/auth'
-import { fmtINR, fmtPct, initials, roleLabel, downloadCSV, downloadExcel, printHTML, rowsToHTMLTable, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN } from '../utils/format'
+import { fmtINR, fmtPct, initials, roleLabel, downloadCSV, downloadExcel, printHTML, rowsToHTMLTable, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN, validateStrongPassword } from '../utils/format'
 import api from '../api'
 
 const sampleClients = []
@@ -193,7 +193,8 @@ export default function ClientsList() {
     setAddSuccess('')
     if (!addForm.name.trim()) { setAddError('Full name is required.'); return }
     if (!addForm.email.trim()) { setAddError('Email is required.'); return }
-    if (!addForm.password || addForm.password.length < 6) { setAddError('Password must be at least 6 characters.'); return }
+    const pwRes = validateStrongPassword(addForm.password)
+    if (!pwRes.valid) { setAddError(pwRes.error); return }
 
     let finalPhone = ''
     if (addForm.phone) {
@@ -590,8 +591,8 @@ export default function ClientsList() {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Password *</label>
-                    <input type="password" value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} placeholder="Min. 6 characters" minLength={6} required />
+                    <label>Password * <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 'normal' }}>(8+ chars: Capital, small, number, symbol)</span></label>
+                    <input type="password" value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} placeholder="Min. 8 chars (e.g. Client@123)" minLength={8} required />
                   </div>
                   <div className="form-group">
                     <label>Phone</label>

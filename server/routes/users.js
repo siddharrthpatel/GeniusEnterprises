@@ -12,8 +12,15 @@ const VALID_ROLES = [
 ];
 const isProd = process.env.NODE_ENV === 'production';
 
-const PASSWORD_RE =
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const isStrongPassword = (val) => {
+  if (typeof val !== 'string' || val.length < 8 || val.length > 128) return false;
+  return (
+    /[a-z]/.test(val) &&
+    /[A-Z]/.test(val) &&
+    /\d/.test(val) &&
+    /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?`~]/.test(val)
+  );
+};
 
 const publicFields = (user) => {
   if (!user) return null;
@@ -24,6 +31,11 @@ const publicFields = (user) => {
 router.get('/', authenticate, async (req, res, next) => {
   try {
     const { role, q } = req.query;
+    // Clients can only access their own profile
+    if (req.user.role === 'client') {
+      const selfUser = await supabaseDb.getUserById(req.user.id);
+      return res.json({ users: [publicFields(selfUser)].filter(Boolean) });
+    }
     const users = await supabaseDb.getUsers({ role, q });
     res.json({ users: users.map(publicFields) });
   } catch (err) {
@@ -39,6 +51,10 @@ router.get(
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) return res.status(400).json({ error: 'Invalid id' });
+      const allowed = await supabaseDb.canAccessUser(req.user, req.params.id);
+      if (!allowed) {
+        return res.status(403).json({ error: 'Forbidden: access denied' });
+      }
       const user = await supabaseDb.getUserById(req.params.id);
       if (!user) return res.status(404).json({ error: 'User not found' });
       res.json(publicFields(user));
@@ -59,8 +75,8 @@ router.post(
       .isString()
       .isLength({ min: 8, max: 128 })
       .custom((value) => {
-        if (isProd && !PASSWORD_RE.test(value)) {
-          throw new Error('Password must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special character');
+        if (!isStrongPassword(value)) {
+          throw new Error('Password must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special symbol (min 8 chars)');
         }
         return true;
       }),
@@ -120,11 +136,8 @@ router.put(
       });
       if (req.body.password) {
         const pwd = String(req.body.password);
-        if (pwd.length < 8 || pwd.length > 128) {
-          return res.status(400).json({ error: 'Password must be 8-128 chars' });
-        }
-        if (isProd && !PASSWORD_RE.test(pwd)) {
-          return res.status(400).json({ error: 'Password must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special character' });
+        if (!isStrongPassword(pwd)) {
+          return res.status(400).json({ error: 'Password must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special symbol (min 8 chars)' });
         }
         patch.password = pwd;
       }
@@ -142,7 +155,15 @@ router.post(
   requireRole(['admin', 'master_admin']),
   [
     param('id').isString().isLength({ min: 1, max: 64 }),
-    body('newPassword').isString().isLength({ min: 8, max: 128 }),
+    body('newPassword')
+      .isString()
+      .isLength({ min: 8, max: 128 })
+      .custom((value) => {
+        if (!isStrongPassword(value)) {
+          throw new Error('Password must contain 1 uppercase, 1 lowercase, 1 digit, and 1 special symbol (min 8 chars)');
+        }
+        return true;
+      }),
   ],
   async (req, res, next) => {
     try {

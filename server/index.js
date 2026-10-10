@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const { validateEnv } = require('./middleware/validateEnv');
 const { generalLimiter } = require('./middleware/rateLimit');
+const { csrfProtection } = require('./middleware/csrf');
 const { refreshSupabaseSession } = require('./utils/supabase/middleware');
 
 const authRoutes = require('./routes/auth');
@@ -68,6 +69,7 @@ app.use(express.json({ limit: '100kb' }));
 app.use(express.urlencoded({ extended: true, limit: '100kb' }));
 app.use(morgan(isProd ? 'combined' : 'dev'));
 app.use('/api', generalLimiter);
+app.use('/api', csrfProtection);
 app.use(refreshSupabaseSession);
 
 app.get('/api/health', (req, res) => {

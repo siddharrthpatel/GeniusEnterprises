@@ -898,3 +898,37 @@ insert into public.platform_settings (key, value, is_secret)
 values
   ('login_default_tab', 'client', false)
 on conflict (key) do nothing;
+
+-- -----------------------------------------------------------------------------
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- -----------------------------------------------------------------------------
+alter table if exists public.profiles enable row level security;
+alter table if exists public.clients enable row level security;
+alter table if exists public.accounts enable row level security;
+alter table if exists public.transactions enable row level security;
+alter table if exists public.branches enable row level security;
+alter table if exists public.support_tickets enable row level security;
+alter table if exists public.kyc_documents enable row level security;
+alter table if exists public.commissions enable row level security;
+alter table if exists public.salary_slips enable row level security;
+alter table if exists public.attendance enable row level security;
+alter table if exists public.meetings_tasks enable row level security;
+alter table if exists public.mutual_funds enable row level security;
+alter table if exists public.insurance_policies enable row level security;
+alter table if exists public.insurance_renewals enable row level security;
+alter table if exists public.loans enable row level security;
+alter table if exists public.loan_emis enable row level security;
+
+-- service_role full bypass
+create policy if not exists "service_role has full access to profiles" on public.profiles for all to service_role using (true) with check (true);
+create policy if not exists "service_role has full access to clients" on public.clients for all to service_role using (true) with check (true);
+create policy if not exists "service_role has full access to accounts" on public.accounts for all to service_role using (true) with check (true);
+create policy if not exists "service_role has full access to transactions" on public.transactions for all to service_role using (true) with check (true);
+create policy if not exists "service_role has full access to support_tickets" on public.support_tickets for all to service_role using (true) with check (true);
+
+-- User self-access & staff access
+create policy if not exists "users read own profile or staff read all" on public.profiles for select to authenticated using (id = auth.uid() or role <> 'client'::public.user_role);
+create policy if not exists "users update own profile" on public.profiles for update to authenticated using (id = auth.uid()) with check (id = auth.uid());
+create policy if not exists "clients read own client record" on public.clients for select to authenticated using (user_id = auth.uid() or exists (select 1 from public.profiles where id = auth.uid() and role <> 'client'::public.user_role));
+create policy if not exists "clients read own accounts" on public.accounts for select to authenticated using (exists (select 1 from public.clients c where c.id = accounts.client_id and c.user_id = auth.uid()) or exists (select 1 from public.profiles where id = auth.uid() and role <> 'client'::public.user_role));
+

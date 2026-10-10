@@ -33,7 +33,11 @@ function readableCode(code) {
 }
 
 async function fetchYahooQuote(yahooSymbol) {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${yahooSymbol}?range=1d&interval=1d`;
+  if (!yahooSymbol || typeof yahooSymbol !== 'string') return null;
+  const clean = yahooSymbol.trim();
+  // SSRF guard: restrict symbol to safe financial ticker patterns
+  if (!/^[A-Za-z0-9^.=%-]{1,25}$/.test(clean)) return null;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(clean)}?range=1d&interval=1d`;
   const res = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
     signal: AbortSignal.timeout(8000),
