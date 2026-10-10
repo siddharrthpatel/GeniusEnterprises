@@ -2040,16 +2040,6 @@ function EmployeeDashboard() {
 
         <div className="dash-grid-cols-2 mt-1">
           <div className="card">
-            <h3 className="mb-1">🗓️ Weekly Attendance</h3>
-            <AttendanceWeek record={data.attendance} />
-          </div>
-          <div>
-            <SalarySlip data={data.salary} />
-          </div>
-        </div>
-
-        <div className="dash-grid-cols-2 mt-1">
-          <div className="card">
             <h3 className="mb-1">📊 Branch Footfall — This Week</h3>
             <div style={{ width: '100%', height: '240px' }}>
               <AreaChart data={data.footfall}>
