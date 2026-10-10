@@ -113,7 +113,7 @@ import {
   Area
 } from 'recharts'
 import { useAuthStore, getLocalUsersList, deleteLocalUser } from '../store/auth'
-import { fmtINR, fmtPct, fmtNum, initials, roleBadgeClass, roleLabel } from '../utils/format'
+import { fmtINR, fmtPct, fmtNum, initials, roleBadgeClass, roleLabel, downloadExcel, printHTML } from '../utils/format'
 import api from '../api'
 import SubBrokerDashboard from './SubBrokerDashboard'
 import MasterAdmin from './MasterAdmin'
@@ -518,7 +518,7 @@ const ProfileCard = ({ client }) => (
   </div>
 )
 
-const SupportTickets = ({ tickets }) => (
+const SupportTickets = ({ tickets = [], onRaiseTicket }) => (
   <div style={{
     background: '#fff', borderRadius: '14px', padding: '1.1rem',
     boxShadow: '0 2px 12px rgba(11,28,59,0.06)', borderLeft: '4px solid #8e44ad', height: '100%'
@@ -528,7 +528,12 @@ const SupportTickets = ({ tickets }) => (
         <FontAwesomeIcon icon={faLifeRing} style={{ marginRight: 6, color: '#8e44ad' }} />
         Support Tickets & Service Requests
       </h4>
-      <button className="btn-primary btn-sm" style={{ fontSize: '0.75rem', padding: '0.3rem 0.7rem' }}>
+      <button
+        type="button"
+        onClick={onRaiseTicket}
+        className="btn-primary btn-sm"
+        style={{ fontSize: '0.75rem', padding: '0.35rem 0.75rem', cursor: 'pointer' }}
+      >
         <FontAwesomeIcon icon={faTicket} /> Raise Ticket
       </button>
     </div>
@@ -543,25 +548,33 @@ const SupportTickets = ({ tickets }) => (
           </tr>
         </thead>
         <tbody>
-          {tickets.map((t) => (
-            <tr key={t.id}>
-              <td style={{ fontWeight: 700, fontSize: '0.78rem', color: '#14305C' }}>{t.id}</td>
-              <td style={{ fontSize: '0.82rem', fontWeight: 600 }}>
-                <FontAwesomeIcon icon={t.icon || faComments} style={{ color: '#8e44ad', marginRight: 6 }} />
-                {t.subject}
+          {(!tickets || tickets.length === 0) ? (
+            <tr>
+              <td colSpan="4" style={{ textAlign: 'center', color: '#64748b', padding: '1.5rem', fontStyle: 'italic', fontSize: '0.82rem' }}>
+                No active support tickets found. Click "Raise Ticket" above to submit a service request.
               </td>
-              <td>
-                <span className="badge" style={{
-                  background: t.status === 'Resolved' ? '#dcfce7' :
-                            t.status === 'In Progress' ? '#dbeafe' : '#fef3c7',
-                  color: t.status === 'Resolved' ? '#16a34a' :
-                         t.status === 'In Progress' ? '#1d4ed8' : '#92400e',
-                  fontWeight: 700, fontSize: '0.7rem'
-                }}>{t.status}</span>
-              </td>
-              <td style={{ fontSize: '0.76rem', color: '#64748b' }}>{t.updated}</td>
             </tr>
-          ))}
+          ) : (
+            tickets.map((t) => (
+              <tr key={t.id}>
+                <td style={{ fontWeight: 700, fontSize: '0.78rem', color: '#14305C' }}>{t.id}</td>
+                <td style={{ fontSize: '0.82rem', fontWeight: 600 }}>
+                  <FontAwesomeIcon icon={t.icon || faComments} style={{ color: '#8e44ad', marginRight: 6 }} />
+                  {t.subject}
+                </td>
+                <td>
+                  <span className="badge" style={{
+                    background: t.status === 'Resolved' ? '#dcfce7' :
+                              t.status === 'In Progress' ? '#dbeafe' : '#fef3c7',
+                    color: t.status === 'Resolved' ? '#16a34a' :
+                           t.status === 'In Progress' ? '#1d4ed8' : '#92400e',
+                    fontWeight: 700, fontSize: '0.7rem'
+                  }}>{t.status}</span>
+                </td>
+                <td style={{ fontSize: '0.76rem', color: '#64748b' }}>{t.updated}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
@@ -2161,6 +2174,22 @@ function ClientDashboard() {
 
   const [portfolioData, setPortfolioData] = useState(null)
 
+  // Support Tickets State
+  const [tickets, setTickets] = useState(() => {
+    try {
+      const key = `ge_client_tickets_${user?.id || user?.email || 'default'}`
+      const saved = localStorage.getItem(key)
+      return saved ? JSON.parse(saved) : []
+    } catch (_) {
+      return []
+    }
+  })
+  const [showTicketModal, setShowTicketModal] = useState(false)
+  const [ticketSubject, setTicketSubject] = useState('')
+  const [ticketCategory, setTicketCategory] = useState('Mutual Funds & SIP')
+  const [ticketMessage, setTicketMessage] = useState('')
+  const [ticketNotice, setTicketNotice] = useState('')
+
   useEffect(() => {
     let isMounted = true
     const fetchPortfolio = async () => {
@@ -2200,6 +2229,162 @@ function ClientDashboard() {
   const stockInvested = stocks.reduce((sum, h) => sum + (Number(h.invested) || Number(h.avgPrice * h.units) || 0), 0)
 
   const recentTxns = portfolioData?.transactions || []
+
+  const handleCreateTicket = (e) => {
+    e.preventDefault()
+    if (!ticketSubject.trim()) return
+    const newTicket = {
+      id: `TICK-${Math.floor(1000 + Math.random() * 9000)}`,
+      subject: ticketSubject.trim(),
+      category: ticketCategory,
+      status: 'Open',
+      updated: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    }
+    const next = [newTicket, ...tickets]
+    setTickets(next)
+    try {
+      const key = `ge_client_tickets_${user?.id || user?.email || 'default'}`
+      localStorage.setItem(key, JSON.stringify(next))
+    } catch (_) {}
+    setTicketSubject('')
+    setTicketMessage('')
+    setShowTicketModal(false)
+    setTicketNotice(`✓ Support Ticket #${newTicket.id} raised successfully! Our team will attend shortly.`)
+    setTimeout(() => setTicketNotice(''), 6000)
+  }
+
+  const handleDownloadStatementPDF = () => {
+    const clientName = profile.name || user?.name || 'Valued Client'
+    const clientId = profile.customerId || 'CUST-00001'
+    const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+
+    let txRowsHTML = ''
+    if (recentTxns && recentTxns.length > 0) {
+      txRowsHTML = recentTxns.map(t => `
+        <tr>
+          <td>${t.date || '—'}</td>
+          <td>${t.desc || t.particulars || t.scheme || 'Order'}</td>
+          <td>${t.type || 'ORDER'}</td>
+          <td style="font-weight: 700;">${fmtINR(t.amount || 0)}</td>
+        </tr>
+      `).join('')
+    } else {
+      txRowsHTML = `
+        <tr>
+          <td colspan="4" style="text-align: center; color: #64748b; padding: 16px; font-style: italic;">
+            No recent mutual fund or stock transactions recorded for this statement period.
+          </td>
+        </tr>
+      `
+    }
+
+    let mfRowsHTML = ''
+    if (mutualFunds && mutualFunds.length > 0) {
+      mfRowsHTML = mutualFunds.map(f => {
+        const val = Number(f.totalValue) || Number(f.currentPrice * f.units) || 0
+        return `<tr>
+          <td>${f.name || f.scheme || 'Scheme'}</td>
+          <td>${Number(f.units || 0).toFixed(2)}</td>
+          <td>₹${Number(f.currentPrice || f.nav || 0).toFixed(2)}</td>
+          <td>${fmtINR(val)}</td>
+        </tr>`
+      }).join('')
+    } else {
+      mfRowsHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b; font-style: italic;">No mutual fund holdings recorded.</td></tr>`
+    }
+
+    let stockRowsHTML = ''
+    if (stocks && stocks.length > 0) {
+      stockRowsHTML = stocks.map(s => {
+        const val = Number(s.totalValue) || Number(s.currentPrice * s.units) || 0
+        return `<tr>
+          <td>${s.name || s.symbol || 'Stock'}</td>
+          <td>${s.units || s.qty || 0}</td>
+          <td>₹${Number(s.currentPrice || 0).toFixed(2)}</td>
+          <td>${fmtINR(val)}</td>
+        </tr>`
+      }).join('')
+    } else {
+      stockRowsHTML = `<tr><td colspan="4" style="text-align: center; color: #64748b; font-style: italic;">No stock holdings recorded.</td></tr>`
+    }
+
+    const htmlContent = `
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
+        <table style="width: 100%; border: none; margin: 0;">
+          <tr style="background: none;"><td style="border: none; padding: 3px 0;"><strong>Client Name:</strong> ${clientName}</td><td style="border: none; padding: 3px 0;"><strong>Account ID:</strong> ${clientId}</td></tr>
+          <tr style="background: none;"><td style="border: none; padding: 3px 0;"><strong>PAN:</strong> ${profile.pan || '—'}</td><td style="border: none; padding: 3px 0;"><strong>Email:</strong> ${profile.email || '—'}</td></tr>
+          <tr style="background: none;"><td style="border: none; padding: 3px 0;"><strong>Statement Date:</strong> ${dateStr}</td><td style="border: none; padding: 3px 0;"><strong>Total Valuation:</strong> ${fmtINR(totalValue)}</td></tr>
+        </table>
+      </div>
+
+      <h2>Portfolio Valuation Summary</h2>
+      <table>
+        <thead>
+          <tr><th>Asset Class</th><th>Invested Capital</th><th>Current Market Value</th><th>Unrealized P&amp;L</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Mutual Funds</td>
+            <td>${fmtINR(mfInvested)}</td>
+            <td>${fmtINR(mfValue)}</td>
+            <td class="${mfValue >= mfInvested ? 'success' : 'danger'}">${mfValue >= mfInvested ? '+' : ''}${fmtINR(mfValue - mfInvested)}</td>
+          </tr>
+          <tr>
+            <td>Stocks &amp; Equity</td>
+            <td>${fmtINR(stockInvested)}</td>
+            <td>${fmtINR(stockValue)}</td>
+            <td class="${stockValue >= stockInvested ? 'success' : 'danger'}">${stockValue >= stockInvested ? '+' : ''}${fmtINR(stockValue - stockInvested)}</td>
+          </tr>
+          <tr class="summary-row">
+            <td>Total Portfolio</td>
+            <td>${fmtINR(totalInvested)}</td>
+            <td>${fmtINR(totalValue)}</td>
+            <td class="${netReturns >= 0 ? 'success' : 'danger'}">${netReturns >= 0 ? '+' : ''}${fmtINR(netReturns)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Mutual Fund Schemes</h2>
+      <table>
+        <thead><tr><th>Scheme Name</th><th>Units</th><th>NAV (₹)</th><th>Current Value</th></tr></thead>
+        <tbody>${mfRowsHTML}</tbody>
+      </table>
+
+      <h2>Stock &amp; Equity Holdings</h2>
+      <table>
+        <thead><tr><th>Company / Symbol</th><th>Quantity</th><th>CMP (₹)</th><th>Current Value</th></tr></thead>
+        <tbody>${stockRowsHTML}</tbody>
+      </table>
+
+      <h2>Recent Transactions &amp; Orders</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Order Particulars</th><th>Type</th><th>Amount</th></tr></thead>
+        <tbody>${txRowsHTML}</tbody>
+      </table>
+    `
+
+    printHTML(`Client Statement — ${clientName} (${clientId})`, htmlContent)
+  }
+
+  const handleExportExcel = () => {
+    const clientId = profile.customerId || 'Client'
+    const headers = ['Date', 'Order Particulars', 'Type', 'Amount (INR)']
+    let rows = []
+    if (recentTxns && recentTxns.length > 0) {
+      rows = recentTxns.map(t => [
+        t.date || '—',
+        t.desc || t.particulars || t.scheme || 'Order',
+        t.type || 'ORDER',
+        Number(t.amount || 0)
+      ])
+    } else {
+      // Show blank / clean placeholder row when no data
+      rows = [
+        ['—', 'No mutual fund or stock transactions recorded', '—', 0]
+      ]
+    }
+    downloadExcel(headers, rows, `Orders_Statement_${clientId}.xls`)
+  }
 
   return (
     <div>
@@ -2402,7 +2587,7 @@ function ClientDashboard() {
         <div className="card">
           <h3 className="mb-1">💬 Client Support & Queries</h3>
           <div style={{ marginTop: '0.5rem' }}>
-            <SupportTickets tickets={[]} />
+            <SupportTickets tickets={tickets} onRaiseTicket={() => setShowTicketModal(true)} />
           </div>
         </div>
       </div>
@@ -2412,8 +2597,24 @@ function ClientDashboard() {
         <div className="flex-between mb-1">
           <h3>📒 Recent Mutual Funds & Stocks Orders</h3>
           <div style={{ display: 'flex', gap: '0.4rem' }}>
-            <button className="btn btn-sm btn-outline"><FontAwesomeIcon icon={faFilePdf} /> Statement PDF</button>
-            <button className="btn btn-sm btn-outline"><FontAwesomeIcon icon={faFileExcel} /> Export Excel</button>
+            <button
+              type="button"
+              onClick={handleDownloadStatementPDF}
+              className="btn btn-sm btn-outline"
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              title="Download or Print Portfolio & Transactions Statement as PDF"
+            >
+              <FontAwesomeIcon icon={faFilePdf} style={{ color: '#D12020' }} /> Statement PDF
+            </button>
+            <button
+              type="button"
+              onClick={handleExportExcel}
+              className="btn btn-sm btn-outline"
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              title="Export Transactions & Orders to Excel spreadsheet"
+            >
+              <FontAwesomeIcon icon={faFileExcel} style={{ color: '#16a34a' }} /> Export Excel
+            </button>
           </div>
         </div>
         <div className="table-wrap">
@@ -2455,6 +2656,152 @@ function ClientDashboard() {
           </table>
         </div>
       </div>
+
+      {/* Raise Ticket Modal */}
+      {showTicketModal && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(11, 28, 59, 0.65)',
+            backdropFilter: 'blur(4px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            padding: '1rem'
+          }}
+          onClick={() => setShowTicketModal(false)}
+        >
+          <div
+            style={{
+              background: '#fff',
+              borderRadius: '16px',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+              overflow: 'hidden'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{
+              background: 'linear-gradient(135deg, #0B1C3B, #14305C)',
+              color: '#fff',
+              padding: '1.2rem 1.5rem',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#fff' }}>
+                  <FontAwesomeIcon icon={faLifeRing} style={{ marginRight: 8, color: '#F39C12' }} />
+                  Raise Support Ticket
+                </h3>
+                <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+                  Submit a query or request to your relationship manager
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTicketModal(false)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#94a3b8',
+                  fontSize: '1.2rem',
+                  cursor: 'pointer'
+                }}
+              >
+                <FontAwesomeIcon icon={faXmark} />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateTicket} style={{ padding: '1.5rem' }}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                  Category
+                </label>
+                <select
+                  value={ticketCategory}
+                  onChange={(e) => setTicketCategory(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.8rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.88rem'
+                  }}
+                >
+                  <option value="Mutual Funds & SIP">Mutual Funds &amp; SIP Query</option>
+                  <option value="Stocks & Demat">Stocks &amp; Demat Holdings</option>
+                  <option value="Statement & Tax Report">Statement &amp; Tax Report Request</option>
+                  <option value="KYC & Profile Update">KYC / Bank Detail Update</option>
+                  <option value="Redemption / Withdrawal">Redemption / Payout Request</option>
+                  <option value="General Advisory">General Advisory &amp; Support</option>
+                </select>
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                  Subject / Summary *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g., Assistance needed with SIP adjustment or holding statement"
+                  value={ticketSubject}
+                  onChange={(e) => setTicketSubject(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.8rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.88rem'
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, color: '#334155', marginBottom: '0.35rem' }}>
+                  Description / Details
+                </label>
+                <textarea
+                  rows={4}
+                  placeholder="Provide any specific details regarding your query..."
+                  value={ticketMessage}
+                  onChange={(e) => setTicketMessage(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.6rem 0.8rem',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '0.88rem',
+                    resize: 'vertical'
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setShowTicketModal(false)}
+                  className="btn btn-outline btn-sm"
+                  style={{ padding: '0.5rem 1rem' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn-primary btn-sm"
+                  style={{ padding: '0.5rem 1.2rem', display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <FontAwesomeIcon icon={faTicket} /> Submit Ticket
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
