@@ -1,1 +1,19 @@
-[]
+[
+  {
+    "id": "u_mv24ood1_ehlc",
+    "name": "NEELOTPAL DEY",
+    "email": "mcmt.neelotpal@gmail.com",
+    "username": "mcmt.neelotpal",
+    "role": "client",
+    "phone": "+91 945 112 3331",
+    "status": "active",
+    "reportsTo": null,
+    "rmId": null,
+    "armId": null,
+    "advisorId": null,
+    "branchId": null,
+    "pan": "ADCFE3831H",
+    "dob": "2008-10-08",
+    "createdAt": "2026-10-10T08:24:24.662Z"
+  }
+]
