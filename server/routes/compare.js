@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 const express = require('express');
 const { authenticate } = require('../middleware/auth');
 const compareCalc = require('../utils/compareCalc');

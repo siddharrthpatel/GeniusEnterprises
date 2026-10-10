@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 const mobileMenu = document.getElementById('mobile-menu');
 const navLinks = document.getElementById('nav-links');
 const scrollTopBtn = document.getElementById('scrollTopBtn');

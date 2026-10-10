@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 import { createServerClient } from '@supabase/ssr'
 
 const supabaseUrl =

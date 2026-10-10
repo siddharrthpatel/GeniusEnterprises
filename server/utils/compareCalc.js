@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 const sip = (monthly, years, annualPct) => {
   const i = annualPct / 12 / 100;
   const n = years * 12;

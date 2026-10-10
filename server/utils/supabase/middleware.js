@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 const { createSsrClient } = require('./client')
 
 const refreshSupabaseSession = async (req, res, next) => {

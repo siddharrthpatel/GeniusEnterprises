@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 /* ─────────────────────────────────────────────────────────────
    INDIAN PHONE + PAN VALIDATION (shared across all forms)
    ───────────────────────────────────────────────────────────── */

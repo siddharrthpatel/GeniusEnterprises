@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 import { createBrowserClient } from '@supabase/ssr'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL

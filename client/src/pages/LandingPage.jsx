@@ -1,3 +1,4 @@
+﻿/** (developed by @neelotpal.dey) **/
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './LandingPage.css';
