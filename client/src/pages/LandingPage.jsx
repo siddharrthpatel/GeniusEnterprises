@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import './LandingPage.css';
@@ -744,7 +744,7 @@ export default function LandingPage() {
         <nav class="navbar">
             <div class="menu-toggle" id="mobile-menu" role="button" tabindex="0" aria-label="Open navigation menu" onclick="window.geToggleMobileMenu && window.geToggleMobileMenu(event)"><i class="fas fa-bars"></i></div>
             
-            <a href="/portal/login?tab=client" class="mobile-nav-login-btn" title="Login to Client/Employee Portal">
+            <a href="/portal/login?tab=client" class="mobile-nav-login-btn" title="Login to Investor/Employee Portal">
                 <i class="fas fa-user-lock"></i>
                 <span>Login</span>
             </a>
@@ -771,7 +771,7 @@ export default function LandingPage() {
                         <a href="/portal/login?tab=client" class="drawer-action-btn client-action">
                             <i class="fas fa-user-shield"></i>
                             <div>
-                                <span class="action-label">Client Portal</span>
+                                <span class="action-label">Investor Portal</span>
                                 <span class="action-sub">View Portfolio & Returns</span>
                             </div>
                         </a>
@@ -829,9 +829,9 @@ export default function LandingPage() {
                 </li>
             </ul>
             <div class="social-banner">
-                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                <a href="https://www.linkedin.com/in/siddharth-patel-108581304/"><i class="fab fa-linkedin-in"></i></a>
-                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#" title="Coming Soon" data-tooltip="Coming Soon" onclick="event.preventDefault(); alert('Coming Soon');"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" title="Coming Soon" data-tooltip="Coming Soon" onclick="event.preventDefault(); alert('Coming Soon');"><i class="fab fa-linkedin-in"></i></a>
+                <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a>
             </div>
         </nav>
 
@@ -1994,12 +1994,11 @@ export default function LandingPage() {
                     <span class="contact-subtext">Sunday by appointment only</span>
                 </div>
 
-                <a href="https://maps.app.goo.gl/BBG3dgjjcGwnEo4r9" target="_blank" rel="noopener noreferrer" class="large-contact-btn office" style="text-decoration: none;">
+                <div class="large-contact-btn office">
                     <i class="fas fa-map-marker-alt"></i> 
                     <span class="contact-title">Our Office</span>
-                    <span class="contact-detail" style="font-size: 0.82rem; line-height: 1.3;">SH 11/50 D-L PATEL NAGAR COLONY SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</span>
-                    <span class="contact-subtext">Click to open in Google Maps</span>
-                </a>
+                    <span class="contact-detail" style="font-size: 0.82rem; line-height: 1.3;">SH 11/50 D-L SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</span>
+                </div>
             </div>
         </div>
     </section>
@@ -2011,9 +2010,9 @@ export default function LandingPage() {
                 <h3>Genius Enterprises</h3>
                 <p>Your dedicated partner in wealth management, investment planning, and securing your financial future for the long term.</p>
                 <div class="footer-socials">
-                    <a href="#"><i class="fab fa-facebook-f"></i></a>
-                    <a href="https://www.linkedin.com/in/siddharth-patel-108581304/"><i class="fab fa-linkedin-in"></i></a>
-                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#" title="Coming Soon" data-tooltip="Coming Soon" onclick="event.preventDefault(); alert('Coming Soon');"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" title="Coming Soon" data-tooltip="Coming Soon" onclick="event.preventDefault(); alert('Coming Soon');"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://instagram.com/" target="_blank" rel="noopener noreferrer" title="Instagram"><i class="fab fa-instagram"></i></a>
                 </div>
             </div>
 
@@ -2040,7 +2039,7 @@ export default function LandingPage() {
             <div class="footer-column">
                 <h3>Contact Us</h3>
                 <ul class="footer-contact">
-                    <li><i class="fas fa-map-marker-alt"></i> <a href="https://maps.app.goo.gl/BBG3dgjjcGwnEo4r9" target="_blank" rel="noopener noreferrer" style="color: #ffffff; text-decoration: none;">SH 11/50 D-L PATEL NAGAR COLONY SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</a></li>
+                    <li><i class="fas fa-map-marker-alt"></i> <span>SH 11/50 D-L SECTOR A-3 CHATARIPUR SHIVPUR VARANASI -221003</span></li>
                     <li><i class="fas fa-phone-alt"></i> +91-7317064063</li>
                     <li><i class="fas fa-envelope"></i> geniusenterprises189837@gmail.com</li>
                 </ul>
@@ -2052,11 +2051,13 @@ export default function LandingPage() {
         </div>
     </footer>
 
-    <!-- Floating Action Buttons: Up Arrow, WhatsApp, Phone Call -->
+    <!-- Scroll to Top Button (Right Side) -->
+    <button id="scrollTopBtn" class="floating-btn scroll-top-btn" title="Back to top" aria-label="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Floating Action Buttons: WhatsApp & Phone Call (Left-Hand Side) -->
     <div id="floating-contacts" class="floating-contacts">
-        <button id="scrollTopBtn" class="floating-btn scroll-top-btn" title="Back to top" aria-label="Back to top" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
-            <i class="fas fa-arrow-up"></i>
-        </button>
         <a href="https://wa.me/917317064063?text=Hello%20Genius%20Enterprises,%20I%20would%20like%20to%20know%20more%20about%20your%20services." target="_blank" rel="noopener noreferrer" class="floating-btn whatsapp-float" title="Chat on WhatsApp" aria-label="Chat on WhatsApp">
             <i class="fab fa-whatsapp"></i>
         </a>

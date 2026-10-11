@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation, useSearchParams } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -17,7 +17,7 @@ import {
 import api from '../api'
 import { useAuthStore, findLocalUser } from '../store/auth'
 
-const CLIENT_ROLE = { id: 'client', label: 'Client', username: '', password: '', email: '' }
+const CLIENT_ROLE = { id: 'client', label: 'Investor', username: '', password: '', email: '' }
 
 const EMPLOYEE_ROLES = [
   { id: 'admin', label: 'Admin', username: 'admin', password: 'Admin@123', email: 'admin@genius.com' },
@@ -347,7 +347,7 @@ export default function Login() {
                 refreshCaptcha()
               }}
             >
-              <FontAwesomeIcon icon={faUser} /> CLIENT PORTAL
+              <FontAwesomeIcon icon={faUser} /> INVESTOR PORTAL
             </button>
             <button
               type="button"
@@ -507,7 +507,7 @@ export default function Login() {
 
           <div className="ge-landing-foot">
             <div>
-              New client? <Link to="/portal/signup">Open an Account</Link>
+              New investor? <Link to="/portal/signup">Open an Account</Link>
             </div>
             <div>© Genius Enterprises • Secure Gateway</div>
           </div>
