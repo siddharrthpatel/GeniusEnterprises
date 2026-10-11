@@ -723,16 +723,7 @@ export default function LandingPage() {
             </div>
             
             <div class="header-contact-info">
-                <div class="contact-item">
-                    <i class="fas fa-phone-alt"></i>
-                    <a href="tel:+917317064063">+91-7317064063</a>
-                </div>
-                <div class="contact-item">
-                    <i class="fas fa-envelope"></i>
-                    <a href="mailto:geniusenterprises189837@gmail.com?subject=Website%20Inquiry&body=Hello%20Genius%20Enterprises,%20I%20would%20like%20to%20know%20more%20about%20your%20services.">geniusenterprises189837@gmail.com</a>
-                </div>
                 <a href="/portal/login?tab=client" class="login-portal-btn" style="display: flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--accent-red); color: white; text-decoration: none; border-radius: 20px; font-weight: bold;"><i class="fas fa-user-lock"></i> Login Portal</a>
-                <a href="https://wa.me/917317064063?text=Hello%20Genius%20Enterprises,%20I%20would%20like%20to%20know%20more%20about%20your%20services." class="whatsapp-btn" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
             </div>
 
             <!-- New Image Banner that fills the entire header area on scroll -->
