@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 const fs = require('fs');
 const path = require('path');
 

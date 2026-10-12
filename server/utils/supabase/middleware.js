@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 const { createSsrInvestor } = require('./client')
 
 const refreshSupabaseSession = async (req, res, next) => {

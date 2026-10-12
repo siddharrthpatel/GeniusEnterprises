@@ -1,4 +1,4 @@
-﻿-- =============================================================================
+-- =============================================================================
 -- Genius Enterprises — RESET ALL DATA TO ZERO (KEEP LOGIN CREDENTIALS)
 -- Paste and Run in Supabase SQL Editor:
 -- Dashboard → SQL Editor → New Query → Run

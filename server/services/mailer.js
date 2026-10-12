@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 const dns = require('dns');

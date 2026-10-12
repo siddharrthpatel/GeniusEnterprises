@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 const rateLimit = require('express-rate-limit')
 
 const authLimiter = rateLimit({

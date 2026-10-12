@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 import client from './client.js'
 import { createInvestor as createServerInvestor } from './server.js'
 

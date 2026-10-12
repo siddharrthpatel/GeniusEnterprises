@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 const express = require('express');
 const supabaseDb = require('../services/supabaseDb');
 const { authenticate } = require('../middleware/auth');

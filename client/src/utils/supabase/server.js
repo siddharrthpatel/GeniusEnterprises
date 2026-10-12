@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 import { createServerInvestor } from '@supabase/ssr'
 
 const supabaseUrl =

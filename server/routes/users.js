@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const { body, param, validationResult } = require('express-validator');

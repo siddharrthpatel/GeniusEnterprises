@@ -1,4 +1,4 @@
-﻿-- Incremental: add master_admin / sub_broker + platform control tables
+-- Incremental: add master_admin / sub_broker + platform control tables
 -- Use this if 0001/0002 already ran. For a brand-new project use supabase/IMPORT_ME.sql instead.
 
 create schema if not exists internal;

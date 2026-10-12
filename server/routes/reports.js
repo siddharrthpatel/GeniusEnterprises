@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 const express = require('express');
 const PDFDocument = require('pdfkit');
 const ExcelJS = require('exceljs');

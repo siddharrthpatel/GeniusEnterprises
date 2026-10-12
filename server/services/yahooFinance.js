@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 const platform = require('../data/platformStore');
 
 const CACHE_TTL_MS = 30000;

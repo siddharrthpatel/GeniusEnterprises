@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 import axios from 'axios'
 import { useAuthStore } from '../store/auth'
 

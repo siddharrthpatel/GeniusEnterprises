@@ -1,4 +1,4 @@
-﻿CREATE EXTENSION IF NOT EXISTS "pgcrypto" SCHEMA extensions;
+CREATE EXTENSION IF NOT EXISTS "pgcrypto" SCHEMA extensions;
 
 CREATE TYPE user_role AS ENUM ('master_admin','admin','branch_manager','rm','arm','advisor','sub_broker','employee','client');
 

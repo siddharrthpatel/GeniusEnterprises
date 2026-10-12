@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 
 let html = fs.readFileSync('client/src/pages/raw_landing.html', 'utf8');
 

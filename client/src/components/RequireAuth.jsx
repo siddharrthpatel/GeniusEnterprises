@@ -1,4 +1,4 @@
-﻿/** (developed by @neelotpal.dey) **/
+/** (developed by @neelotpal.dey) **/
 import React from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../store/auth'

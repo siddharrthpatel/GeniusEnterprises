@@ -1,4 +1,4 @@
-﻿-- =============================================================================
+-- =============================================================================
 -- Genius Enterprises — paste this entire file in Supabase SQL Editor (new project)
 -- Dashboard → SQL → New query → Run
 -- After it succeeds, demo logins work against Auth + public.profiles

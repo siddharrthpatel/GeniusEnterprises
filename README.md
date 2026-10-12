@@ -1,4 +1,4 @@
-﻿# Genius Enterprises — Wealth & Enterprise Platform
+# Genius Enterprises — Wealth & Enterprise Platform
 
 [![Platform](https://img.shields.io/badge/platform-React%2018%20%7C%20Node.js%20%7C%20Express-0B1C3B.svg)](https://github.com/siddharrthpatel/GeniusEnterprises)
 [![Database](https://img.shields.io/badge/database-Supabase%20%7C%20PostgreSQL%20(RLS)-3ECF8E.svg)](https://supabase.com)
