@@ -1,5 +1,5 @@
 ﻿/** (developed by @neelotpal.dey) **/
 import client from './client.js'
-import { createClient as createServerClient } from './server.js'
+import { createInvestor as createServerInvestor } from './server.js'
 
-export { client as default, client as supabase, createServerClient }
+export { client as default, client as supabase, createServerInvestor }

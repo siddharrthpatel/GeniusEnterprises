@@ -1,4 +1,4 @@
-CREATE EXTENSION IF NOT EXISTS "pgcrypto" SCHEMA extensions;
+﻿CREATE EXTENSION IF NOT EXISTS "pgcrypto" SCHEMA extensions;
 
 CREATE TYPE user_role AS ENUM ('master_admin','admin','branch_manager','rm','arm','advisor','sub_broker','employee','client');
 
@@ -148,7 +148,7 @@ CREATE TABLE meetings_tasks (
     id uuid PRIMARY KEY DEFAULT extensions.gen_random_uuid(),
     createdBy uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     assignedTo uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    relatedClientId uuid REFERENCES clients(id) ON DELETE SET NULL,
+    relatedInvestorId uuid REFERENCES clients(id) ON DELETE SET NULL,
     type text NOT NULL CHECK (type IN ('meeting','task','followup')),
     title text NOT NULL,
     scheduledAt timestamptz,

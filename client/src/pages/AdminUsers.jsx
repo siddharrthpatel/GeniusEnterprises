@@ -306,7 +306,7 @@ export default function AdminUsers() {
               <option value="advisor">Advisor</option>
               <option value="sub_broker">Sub Broker</option>
               <option value="employee">Employee</option>
-              <option value="client">Client</option>
+              <option value="client">Investor</option>
             </select>
           </div>
         </div>
@@ -361,7 +361,7 @@ export default function AdminUsers() {
                         className="btn-danger btn-sm"
                         onClick={() => setDelConfirm(u)}
                         disabled={isProtectedUser(u)}
-                        title={isProtectedUser(u) ? 'Core staff account cannot be deleted' : 'Delete User / Client'}
+                        title={isProtectedUser(u) ? 'Core staff account cannot be deleted' : 'Delete User / Investor'}
                       >
                         <FontAwesomeIcon icon={faTrashCan} />
                       </button>
@@ -425,7 +425,7 @@ export default function AdminUsers() {
                       <option value="advisor">Advisor</option>
                       <option value="sub_broker">Sub Broker</option>
                       <option value="employee">Employee</option>
-                      <option value="client">Client</option>
+                      <option value="client">Investor</option>
                     </select>
                   </div>
                   <div className="form-group">

@@ -1,4 +1,4 @@
-# Genius Enterprises — Wealth & Enterprise Platform
+﻿# Genius Enterprises — Wealth & Enterprise Platform
 
 [![Platform](https://img.shields.io/badge/platform-React%2018%20%7C%20Node.js%20%7C%20Express-0B1C3B.svg)](https://github.com/siddharrthpatel/GeniusEnterprises)
 [![Database](https://img.shields.io/badge/database-Supabase%20%7C%20PostgreSQL%20(RLS)-3ECF8E.svg)](https://supabase.com)
@@ -15,11 +15,11 @@ A full-stack, enterprise-grade wealth management and financial services portal d
 Dedicated dashboards tailored to each tier of the enterprise hierarchy:
 * **Master Admin & Admin**: Full system control, user access provisioning, portfolio administration, audit logs, and security oversight.
 * **Branch Manager (BM)**: Branch-level AUM monitoring, RM/advisor tracking, performance metrics, and client accounts.
-* **Relationship Manager (RM) & Associate RM (ARM)**: Client relationship management, book growth, transaction oversight, and goal targets.
-* **Financial Advisor**: Client portfolios, mutual fund SIP books, trade records, and meeting schedules.
+* **Relationship Manager (RM) & Associate RM (ARM)**: Investor relationship management, book growth, transaction oversight, and goal targets.
+* **Financial Advisor**: Investor portfolios, mutual fund SIP books, trade records, and meeting schedules.
 * **Sub-Broker**: Downline channel tracking, commission payouts, client KYC status, and live volume sync.
 * **Staff Employee**: Operational tasks, salary slips, attendance logs, and internal requests.
-* **Client Portal**: Personal investment dashboard, asset allocation, transaction history, statement downloads (PDF/Excel), and support ticket management.
+* **Investor Portal**: Personal investment dashboard, asset allocation, transaction history, statement downloads (PDF/Excel), and support ticket management.
 
 ### 📈 Real-Time Market Intelligence
 * Live ticker banner for market indices (**NIFTY 50**, **SENSEX**, **BANK NIFTY**), blue-chip equities, currencies (USD/INR), and commodities.
@@ -80,11 +80,11 @@ GeniusEnterprises/
 │   ├── src/
 │   │   ├── api/                # Axios API instance and interceptors
 │   │   ├── components/         # AppLayout, MarketTicker, NoticeBoard, etc.
-│   │   ├── pages/              # Role dashboards, Login, ClientSignup, Market, etc.
+│   │   ├── pages/              # Role dashboards, Login, InvestorSignup, Market, etc.
 │   │   ├── store/              # Zustand auth and session store
 │   │   └── utils/              # format.js, validations, helper utilities
 │   ├── index.html              # HTML shell
-│   ├── package.json            # Client dependencies
+│   ├── package.json            # Investor dependencies
 │   └── vite.config.js          # Vite build & proxy configuration
 ├── server/                     # Backend API Server
 │   ├── data/                   # Platform stores & configuration

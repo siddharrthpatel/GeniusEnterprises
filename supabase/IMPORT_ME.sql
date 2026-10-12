@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Genius Enterprises — paste this entire file in Supabase SQL Editor (new project)
 -- Dashboard → SQL → New query → Run
 -- After it succeeds, demo logins work against Auth + public.profiles
@@ -11,7 +11,7 @@
 --   advisor@genius.com    / Adv@123
 --   broker@genius.com     / Broker@123   (sub_broker)
 --   employee@genius.com   / Emp@123
---   client1@genius.com    / Client@123
+--   client1@genius.com    / Investor@123
 -- =============================================================================
 
 create extension if not exists pgcrypto with schema extensions;
@@ -653,7 +653,7 @@ insert into public.dashboard_modules (id, label, role, is_active) values
   ('advisor', 'Advisor', 'advisor', true),
   ('sub_broker', 'Sub Broker', 'sub_broker', true),
   ('employee', 'Employee', 'employee', true),
-  ('client', 'Client', 'client', true)
+  ('client', 'Investor', 'client', true)
 on conflict (id) do nothing;
 
 insert into public.notices (kind, title, body, audience, is_active) values
@@ -770,7 +770,7 @@ begin
   v_adv    := internal.upsert_demo_user('advisor@genius.com','Adv@123','advisor','Anita Gupta','advisor');
   v_broker := internal.upsert_demo_user('broker@genius.com','Broker@123','sub_broker','Karan Malhotra','broker');
   v_emp    := internal.upsert_demo_user('employee@genius.com','Emp@123','employee','Vikram Singh','employee');
-  v_client := internal.upsert_demo_user('client1@genius.com','Client@123','client','Rajesh Kumar','client');
+  v_client := internal.upsert_demo_user('client1@genius.com','Investor@123','client','Rajesh Kumar','client');
 
   update public.profiles set branch_id = v_branch, reports_to = v_admin where id = v_bm;
   update public.profiles set branch_id = v_branch, reports_to = v_bm where id = v_rm;
@@ -847,7 +847,7 @@ grant insert, update, delete on public.login_flow_presets to authenticated;
 
 insert into public.login_flow_presets (flow_id, display_name, description, roles, hero_gradient, accent_color, is_default)
 values
-  ('client', 'Client Portal', 'Public investor login — clients only.',
+  ('client', 'Investor Portal', 'Public investor login — clients only.',
    ARRAY['client']::public.user_role[],
    'linear-gradient(135deg, #0b1c3b 0%, #1a3c6d 100%)',
    '#d12020',

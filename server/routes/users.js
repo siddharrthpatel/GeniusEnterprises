@@ -32,7 +32,7 @@ const publicFields = (user) => {
 router.get('/', authenticate, async (req, res, next) => {
   try {
     const { role, q } = req.query;
-    // Clients can only access their own profile
+    // Investors can only access their own profile
     if (req.user.role === 'client') {
       const selfUser = await supabaseDb.getUserById(req.user.id);
       return res.json({ users: [publicFields(selfUser)].filter(Boolean) });

@@ -52,7 +52,7 @@ const DEFAULTS = {
     { id: 'advisor', label: 'Advisor', role: 'advisor', isActive: true },
     { id: 'sub_broker', label: 'Sub Broker', role: 'sub_broker', isActive: true },
     { id: 'employee', label: 'Employee', role: 'employee', isActive: true },
-    { id: 'client', label: 'Client', role: 'client', isActive: true },
+    { id: 'client', label: 'Investor', role: 'client', isActive: true },
   ],
   notices: [
     {

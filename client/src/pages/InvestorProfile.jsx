@@ -31,7 +31,7 @@ const MAX_DOB = (() => {
 
 const sanitizePhoneDigits = (val) => String(val || '').replace(/\D/g, '').slice(0, 10)
 
-export default function ClientProfile() {
+export default function InvestorProfile() {
   const user = useAuthStore((s) => s.user)
   const setUser = useAuthStore((s) => s.setUser)
   const logout = useAuthStore((s) => s.logout)
@@ -52,7 +52,7 @@ export default function ClientProfile() {
     reportsTo: null, arm: null, rm: null, advisor: null, clientSince: user?.createdAt || '2025-01-05'
   })
 
-  const isClient = user?.role === 'client'
+  const isInvestor = user?.role === 'client'
 
   useEffect(() => {
     if (user) {
@@ -74,7 +74,7 @@ export default function ClientProfile() {
             reportsTo: find(user.reportsTo)?.name || 'Amit Kumar',
             arm: find(user.armId)?.name || 'Priya Sharma',
             rm: find(user.rmId)?.name || 'Rahul Verma',
-            advisor: find(user.advisorId)?.name || (isClient ? 'Neha Gupta' : '—'),
+            advisor: find(user.advisorId)?.name || (isInvestor ? 'Neha Gupta' : '—'),
             clientSince: user.createdAt || '2025-01-05'
           })
         } catch (e) {
@@ -82,14 +82,14 @@ export default function ClientProfile() {
             reportsTo: user.role === 'admin' ? '—' : user.role === 'arm' ? 'Amit Kumar' : 'Priya Sharma',
             arm: ['admin', 'arm'].includes(user.role) ? '—' : 'Priya Sharma',
             rm: ['admin', 'arm', 'rm'].includes(user.role) ? '—' : 'Rahul Verma',
-            advisor: isClient ? 'Neha Gupta' : (user.role === 'advisor' ? '—' : 'Neha Gupta'),
+            advisor: isInvestor ? 'Neha Gupta' : (user.role === 'advisor' ? '—' : 'Neha Gupta'),
             clientSince: user.createdAt || '2025-01-05'
           })
         }
       }
       fetchAll()
     }
-  }, [user, isClient])
+  }, [user, isInvestor])
 
   const change = (k) => (e) => {
     let val = e.target.value
@@ -119,7 +119,7 @@ export default function ClientProfile() {
     }
 
     let finalPAN = form.pan
-    if (isClient && form.pan) {
+    if (isInvestor && form.pan) {
       finalPAN = normalizePAN(form.pan)
       const panRes = validateIndianPAN(finalPAN)
       if (!panRes.valid) {
@@ -135,7 +135,7 @@ export default function ClientProfile() {
         name: form.name,
         phone: finalPhone
       }
-      if (isClient) {
+      if (isInvestor) {
         payload.pan = finalPAN
         payload.dob = form.dob
       }
@@ -207,7 +207,7 @@ export default function ClientProfile() {
                   <tr><td style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', fontWeight: 600 }}>ARM</td><td style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>{structure.arm}</td></tr>
                   <tr><td style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', fontWeight: 600 }}>RM</td><td style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>{structure.rm}</td></tr>
                   <tr><td style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', fontWeight: 600 }}>Advisor</td><td style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>{structure.advisor}</td></tr>
-                  <tr><td style={{ fontWeight: 600 }}>Client Since</td><td>{new Date(structure.clientSince).toLocaleDateString()}</td></tr>
+                  <tr><td style={{ fontWeight: 600 }}>Investor Since</td><td>{new Date(structure.clientSince).toLocaleDateString()}</td></tr>
                 </tbody>
               </table>
             </div>
@@ -248,7 +248,7 @@ export default function ClientProfile() {
                 </div>
               </div>
 
-              {isClient && (
+              {isInvestor && (
                 <div className="form-row">
                   <div className="form-group">
                     <label><FontAwesomeIcon icon={faIdCard} style={{ marginRight: 6 }} />PAN Number</label>

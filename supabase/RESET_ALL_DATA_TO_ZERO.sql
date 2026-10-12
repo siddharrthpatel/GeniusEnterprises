@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Genius Enterprises — RESET ALL DATA TO ZERO (KEEP LOGIN CREDENTIALS)
 -- Paste and Run in Supabase SQL Editor:
 -- Dashboard → SQL Editor → New Query → Run
@@ -37,4 +37,4 @@ END $$;
 --   advisor@genius.com    / Adv@123     (Financial Advisor)
 --   broker@genius.com     / Broker@123  (Sub-Broker)
 --   employee@genius.com   / Emp@123     (Staff Employee)
---   client1@genius.com    / Client@123  (Investor Client)
+--   client1@genius.com    / Investor@123  (Investor Investor)

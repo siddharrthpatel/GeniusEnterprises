@@ -1,9 +1,9 @@
 ﻿/** (developed by @neelotpal.dey) **/
-const { createSsrClient } = require('./client')
+const { createSsrInvestor } = require('./client')
 
 const refreshSupabaseSession = async (req, res, next) => {
   try {
-    const supabase = createSsrClient(req, res)
+    const supabase = createSsrInvestor(req, res)
     const {
       data: { session },
     } = await supabase.auth.getSession()

@@ -1,5 +1,5 @@
 ﻿/** (developed by @neelotpal.dey) **/
-import { createServerClient } from '@supabase/ssr'
+import { createServerInvestor } from '@supabase/ssr'
 
 const supabaseUrl =
   (typeof process !== 'undefined' && process.env.VITE_SUPABASE_URL) ||
@@ -13,8 +13,8 @@ const supabaseKey =
     (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
       import.meta.env.VITE_SUPABASE_ANON_KEY))
 
-export const createClient = (cookieStore) => {
-  return createServerClient(supabaseUrl, supabaseKey, {
+export const createInvestor = (cookieStore) => {
+  return createServerInvestor(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
         return typeof cookieStore?.getAll === 'function'
@@ -42,4 +42,4 @@ export const createClient = (cookieStore) => {
   })
 }
 
-export default createClient
+export default createInvestor

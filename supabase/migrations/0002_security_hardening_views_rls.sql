@@ -1,4 +1,4 @@
--- Security hardening patch for migration 0001.
+﻿-- Security hardening patch for migration 0001.
 -- Applies Supabase / Postgres security best practices:
 --   1. security_invoker = true on all 3 views (prevents view RLS bypass)
 --   2. CREATE OR REPLACE VIEW retains permissions, adds security_invoker

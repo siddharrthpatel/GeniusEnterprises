@@ -45,7 +45,7 @@ const drawPDFHeader = (doc, user) => {
   doc.text(`Portfolio Report - ${user.name}`, 40, 105);
   doc.fontSize(9);
   doc.font('Helvetica');
-  doc.text(`Client ID: ${user.id}`, 40, 128);
+  doc.text(`Investor ID: ${user.id}`, 40, 128);
   doc.text(`Email: ${user.email}`, 40, 142);
   doc.text(`Phone: ${user.phone || 'N/A'}`, 220, 128);
   doc.text(`PAN: ${user.pan || 'N/A'}`, 220, 142);
@@ -188,7 +188,7 @@ router.get('/portfolio/:userId.pdf', authenticate, async (req, res, next) => {
     const endY = doc.page.height - 35;
     doc.fontSize(8);
     doc.fillColor(150, 150, 150);
-    doc.text('This is a system-generated report from Genius Enterprises Client Portal.', 40, endY);
+    doc.text('This is a system-generated report from Genius Enterprises Investor Portal.', 40, endY);
     doc.text('Confidential - For client use only', 420, endY);
 
     doc.end();
@@ -218,11 +218,11 @@ router.get('/portfolio/:userId.xlsx', authenticate, async (req, res, next) => {
     ws1.columns = [{ width: 22 }, { width: 28 }];
     ws1.addRow(['Genius Enterprises - Portfolio Statement']);
     ws1.addRow([]);
-    ws1.addRow(['Client Details']);
+    ws1.addRow(['Investor Details']);
     ws1.addRow(['Name', user.name]);
     ws1.addRow(['Email', user.email]);
     ws1.addRow(['Phone', user.phone || 'N/A']);
-    ws1.addRow(['Client ID', user.id]);
+    ws1.addRow(['Investor ID', user.id]);
     ws1.addRow(['PAN', user.pan || 'N/A']);
     ws1.addRow(['DOB', user.dob || 'N/A']);
     ws1.addRow(['Report Date', new Date().toLocaleDateString('en-IN')]);

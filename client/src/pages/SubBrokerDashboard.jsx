@@ -1,4 +1,4 @@
-/** (developed by @neelotpal.dey) **/
+﻿/** (developed by @neelotpal.dey) **/
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -24,7 +24,7 @@ export default function SubBrokerDashboard() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [metrics, setMetrics] = useState({
-    downlineClients: 0,
+    downlineInvestors: 0,
     policiesSold: 0,
     mfSip: 0,
     brokerageEarned: 0,
@@ -57,7 +57,7 @@ export default function SubBrokerDashboard() {
 
       // Filter clients assigned to this sub-broker
       const currentUserId = user?.id
-      const myClients = combined.filter((c) => {
+      const myInvestors = combined.filter((c) => {
         if (!currentUserId) return false
         return (
           c.reportsTo === currentUserId ||
@@ -67,10 +67,10 @@ export default function SubBrokerDashboard() {
         )
       })
 
-      if (myClients.length === 0) {
+      if (myInvestors.length === 0) {
         // Strictly set to 0 when no data / clients exist in Supabase
         setMetrics({
-          downlineClients: 0,
+          downlineInvestors: 0,
           policiesSold: 0,
           mfSip: 0,
           brokerageEarned: 0,
@@ -84,7 +84,7 @@ export default function SubBrokerDashboard() {
         let kycDone = 0
         let totalInvested = 0
 
-        for (const c of myClients) {
+        for (const c of myInvestors) {
           if (c.pan && c.phone) kycDone++
           if (c.invested) totalInvested += Number(c.invested) || 0
         }
@@ -93,20 +93,20 @@ export default function SubBrokerDashboard() {
         const liveSip = Math.round(totalInvested * 0.1)
 
         setMetrics({
-          downlineClients: myClients.length,
+          downlineInvestors: myInvestors.length,
           policiesSold: 0,
           mfSip: liveSip,
           brokerageEarned: liveBrokerage,
           renewalsDue: 0,
           activeKycCount: kycDone,
-          totalKycCount: myClients.length,
-          clientsList: myClients
+          totalKycCount: myInvestors.length,
+          clientsList: myInvestors
         })
       }
     } catch (err) {
       console.warn('[SubBrokerDashboard] Failed to load data:', err)
       setMetrics({
-        downlineClients: 0,
+        downlineInvestors: 0,
         policiesSold: 0,
         mfSip: 0,
         brokerageEarned: 0,
@@ -128,9 +128,9 @@ export default function SubBrokerDashboard() {
   const stats = [
     {
       icon: faUsers,
-      label: 'Downline Clients',
-      value: String(metrics.downlineClients),
-      sub: metrics.downlineClients > 0 ? 'Across your channel' : '0 registered clients',
+      label: 'Downline Investors',
+      value: String(metrics.downlineInvestors),
+      sub: metrics.downlineInvestors > 0 ? 'Across your channel' : '0 registered clients',
       color: 'linear-gradient(135deg,#0B1C3B,#14305C)'
     },
     {
@@ -191,7 +191,7 @@ export default function SubBrokerDashboard() {
             {refreshing ? 'Refreshing…' : 'Refresh'}
           </button>
           <Link to="/app/clients" className="btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <FontAwesomeIcon icon={faUsers} /> My Clients
+            <FontAwesomeIcon icon={faUsers} /> My Investors
           </Link>
           <Link to="/app/reports" className="btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <FontAwesomeIcon icon={faFileLines} /> Commission Report
@@ -230,14 +230,14 @@ export default function SubBrokerDashboard() {
       {metrics.clientsList.length > 0 ? (
         <div className="card mb-2">
           <div className="flex-between mb-1" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
-            <h3>Downline Clients ({metrics.clientsList.length})</h3>
-            <Link to="/app/clients" className="btn-outline btn-sm">View All in Client Manager</Link>
+            <h3>Downline Investors ({metrics.clientsList.length})</h3>
+            <Link to="/app/clients" className="btn-outline btn-sm">View All in Investor Manager</Link>
           </div>
           <div className="table-responsive">
             <table className="table">
               <thead>
                 <tr>
-                  <th>Client Name</th>
+                  <th>Investor Name</th>
                   <th>Email</th>
                   <th>Phone</th>
                   <th>PAN</th>
@@ -273,13 +273,13 @@ export default function SubBrokerDashboard() {
           <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#e2e8f0', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', fontSize: '1.5rem' }}>
             <FontAwesomeIcon icon={faUsers} />
           </div>
-          <h3 style={{ margin: '0 0 0.5rem', color: '#0B1C3B', fontSize: '1.1rem' }}>No Downline Clients Assigned Yet</h3>
+          <h3 style={{ margin: '0 0 0.5rem', color: '#0B1C3B', fontSize: '1.1rem' }}>No Downline Investors Assigned Yet</h3>
           <p style={{ margin: '0 auto 1.25rem', maxWidth: 520, fontSize: '0.85rem', color: '#64748b', lineHeight: 1.5 }}>
             All channel metrics are currently at zero. When clients register under your sub-broker account or are assigned to you by administrators in Supabase, their real-time portfolio metrics and brokerage earnings will appear here.
           </p>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
             <Link to="/app/clients" className="btn-primary btn-sm">
-              <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: 6 }} /> Register / View Clients
+              <FontAwesomeIcon icon={faUserPlus} style={{ marginRight: 6 }} /> Register / View Investors
             </Link>
           </div>
         </div>

@@ -605,7 +605,7 @@ function AdminDashboard() {
   const [deletingUser, setDeletingUser] = useState(false)
   const [delUserError, setDelUserError] = useState('')
 
-  const handleDeleteClient = async () => {
+  const handleDeleteInvestor = async () => {
     if (!delUserConfirm) return
     setDeletingUser(true)
     setDelUserError('')
@@ -641,13 +641,13 @@ function AdminDashboard() {
         }
         const safeOverview = (pRes?.data && typeof pRes.data === 'object' && !Array.isArray(pRes.data)) ? pRes.data : {}
 
-        const calculatedClients = combined.filter(u => u.role === 'client').length
+        const calculatedInvestors = combined.filter(u => u.role === 'client').length
         const calculatedStaff = combined.filter(u => u.role && u.role !== 'client').length
 
         setData(d => ({
           ...d,
           ...safeOverview,
-          clientsCount: Math.max(safeOverview.clientsCount || 0, calculatedClients),
+          clientsCount: Math.max(safeOverview.clientsCount || 0, calculatedInvestors),
           staffCount: Math.max(safeOverview.staffCount || 0, calculatedStaff),
           users: combined,
           portfolioDist: Array.isArray(safeOverview.portfolioDist) ? safeOverview.portfolioDist : (d.portfolioDist || []),
@@ -664,7 +664,7 @@ function AdminDashboard() {
   return (
     <>
       <div className="dash-grid-stats">
-        <StatCard icon={faUsers} label="Total Clients" value={fmtNum(data.clientsCount)} sub="Registered clients" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" />
+        <StatCard icon={faUsers} label="Total Investors" value={fmtNum(data.clientsCount)} sub="Registered clients" iconBg="linear-gradient(135deg,#0B1C3B,#14305C)" />
         <StatCard icon={faUserTie} label="Staff Members" value={fmtNum(data.staffCount)} sub="Active staff hierarchy" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" />
         <StatCard icon={faSackDollar} label="Aggregate AUM" value={fmtINR(data.aum)} sub="Portfolio wealth" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" />
         <StatCard icon={faChartLine} label="Net Returns" value={fmtPct(data.netReturns)} sub="Weighted avg" iconBg="linear-gradient(135deg,#16a085,#0e6251)" />
@@ -695,7 +695,7 @@ function AdminDashboard() {
 
         <div className="card">
           <div className="flex-between mb-1">
-            <h3>Portfolio Distribution — Top Clients (AUM)</h3>
+            <h3>Portfolio Distribution — Top Investors (AUM)</h3>
           </div>
           <div style={{ width: '100%', height: 280 }}>
             <ResponsiveContainer>
@@ -810,9 +810,9 @@ function AdminDashboard() {
                           fontWeight: 600,
                           whiteSpace: 'nowrap'
                         }}
-                        title="Delete Client"
+                        title="Delete Investor"
                       >
-                        <FontAwesomeIcon icon={faTrashCan} size="xs" /> Delete Client
+                        <FontAwesomeIcon icon={faTrashCan} size="xs" /> Delete Investor
                       </button>
                     ) : (
                       <span style={{ fontSize: '0.76rem', color: '#94a3b8' }}>Core Staff</span>
@@ -837,7 +837,7 @@ function AdminDashboard() {
           <div className="modal-box" style={{ maxWidth: 460 }}>
             <div className="modal-head" style={{ borderBottom: '1px solid #fee2e2' }}>
               <h3 style={{ color: '#b91c1c', display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
-                <FontAwesomeIcon icon={faTriangleExclamation} /> Delete Client Account
+                <FontAwesomeIcon icon={faTriangleExclamation} /> Delete Investor Account
               </h3>
               <button type="button" className="modal-close" onClick={() => !deletingUser && setDelUserConfirm(null)}>
                 <FontAwesomeIcon icon={faXmark} />
@@ -860,7 +860,7 @@ function AdminDashboard() {
                 type="button"
                 className="btn-danger"
                 disabled={deletingUser}
-                onClick={handleDeleteClient}
+                onClick={handleDeleteInvestor}
                 style={{
                   background: '#dc2626',
                   color: '#ffffff',
@@ -875,7 +875,7 @@ function AdminDashboard() {
                 }}
               >
                 <FontAwesomeIcon icon={faTrashCan} />
-                {deletingUser ? 'Deleting…' : 'Delete Client'}
+                {deletingUser ? 'Deleting…' : 'Delete Investor'}
               </button>
             </div>
           </div>
@@ -958,7 +958,7 @@ function BranchManagerDashboard() {
 
   const bmWorkflow = [
     { title: 'Branch Morning Huddle', subtitle: 'Set daily targets for RM/ARM/Staff', status: 'done' },
-    { title: 'High-Value Client Call', subtitle: 'HNI courtesy calls & RM accompany', status: 'done' },
+    { title: 'High-Value Investor Call', subtitle: 'HNI courtesy calls & RM accompany', status: 'done' },
     { title: 'KYC & Audit Review', subtitle: 'Sign pending verifications & compliance', status: 'active' },
     { title: 'Staff Target Review', subtitle: 'Mid-day numbers vs. monthly goal', status: 'active' },
     { title: 'Revenue & MIS Report', subtitle: 'Close day & submit report to ZO', status: 'pending' }
@@ -1009,7 +1009,7 @@ function BranchManagerDashboard() {
             <h3 style={{ color: '#fff', margin: '4px 0' }}>{data.branchName}</h3>
             <div style={{ fontSize: '0.82rem', opacity: 0.9 }}>
               <FontAwesomeIcon icon={faUsers} style={{ marginRight: 5 }} />
-              {data.totalStaff} Staff • {data.clientsThisMonth} New Clients MTD • Rating ⭐ {data.customerRating}
+              {data.totalStaff} Staff • {data.clientsThisMonth} New Investors MTD • Rating ⭐ {data.customerRating}
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
@@ -1021,10 +1021,10 @@ function BranchManagerDashboard() {
 
       <div className="dash-grid-stats">
         <StatCard icon={faHouseUser} label="Total Staff" value={data.totalStaff} sub="Active branch team" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-        <StatCard icon={faUsers} label="New Clients MTD" value={data.clientsThisMonth} sub="Walk-in & referral" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
+        <StatCard icon={faUsers} label="New Investors MTD" value={data.clientsThisMonth} sub="Walk-in & referral" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
         <StatCard icon={faMoneyBillTrendUp} label="Revenue MTD" value={fmtINR(data.revenueMTD)} sub="Branch total" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
         <StatCard icon={faChartLine} label="Mutual Funds" value={data.sipsStarted} sub="Active SIPs Book" iconBg="linear-gradient(135deg,#25D366,#128c4a)" accentColor="#25D366" />
-        <StatCard icon={faArrowTrendUp} label="Stock Accounts" value={data.newAccounts} sub="Demat Client Book" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faArrowTrendUp} label="Stock Accounts" value={data.newAccounts} sub="Demat Investor Book" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
         <StatCard icon={faStar} label="Customer Rating" value={`${data.customerRating} ★`} sub="Branch score" accentColor="#F39C12" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" />
       </div>
 
@@ -1081,7 +1081,7 @@ function BranchManagerDashboard() {
                 <tr>
                   <th>Staff Member</th>
                   <th>Role</th>
-                  <th>Clients</th>
+                  <th>Investors</th>
                   <th>MTD Revenue</th>
                   <th>Perf %</th>
                 </tr>
@@ -1181,7 +1181,7 @@ function ARMDashboard() {
         <StatCard icon={faBolt} label="Today's Tasks" value={data.todaysTasks} sub="Assigned tasks" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
         <StatCard icon={faFilePdf} label="Pending KYC" value={data.pendingKyc} sub="Verification queue" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
         <StatCard icon={faCalendarPlus} label="Meeting Schedule" value={data.meetings} sub="RM syncs today" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-        <StatCard icon={faPhone} label="Client Follow-up" value={data.followUps} sub="Callbacks" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
+        <StatCard icon={faPhone} label="Investor Follow-up" value={data.followUps} sub="Callbacks" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
         <StatCard icon={faInbox} label="Pending Policies" value={data.policiesPending} sub="In-process" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
         <StatCard icon={faUserTie} label="Reporting RM" value={user?.reportsToName || 'Priya Sharma'} sub="Supervisor" accentColor="#2980b9" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" />
       </div>
@@ -1224,7 +1224,7 @@ function ARMDashboard() {
             <table>
               <thead>
                 <tr>
-                  <th>Client</th>
+                  <th>Investor</th>
                   <th>Plan</th>
                   <th>Stage</th>
                   <th>Aging Days</th>
@@ -1268,7 +1268,7 @@ function ARMDashboard() {
             <table>
               <thead>
                 <tr>
-                  <th>Client</th>
+                  <th>Investor</th>
                   <th>Product</th>
                   <th>Priority</th>
                   <th>Status</th>
@@ -1311,7 +1311,7 @@ function ARMDashboard() {
                 <tr>
                   <th>Priority</th>
                   <th>Task Description</th>
-                  <th>Client / Entity</th>
+                  <th>Investor / Entity</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -1392,8 +1392,8 @@ function RMDashboard() {
   const user = useAuthStore((s) => s.user)
   const navigate = useNavigate()
   const [data, setData] = useState({
-    assignedClients: 0,
-    premiumClients: 0,
+    assignedInvestors: 0,
+    premiumInvestors: 0,
     meetings: 0,
     salesCount: 0,
     revenue: 0,
@@ -1403,7 +1403,7 @@ function RMDashboard() {
     performance: 0,
     aumBook: 0,
     upsellPipeline: 0,
-    topClients: [],
+    topInvestors: [],
     salesBreakdown: [],
     quarterlyPerformance: [],
     team: [],
@@ -1430,12 +1430,12 @@ function RMDashboard() {
         }
         setData(prev => ({
           ...prev,
-          assignedClients: combined.length,
-          premiumClients: Math.ceil(combined.length * 0.4),
-          topClients: combined.slice(0, 5).map(c => ({
+          assignedInvestors: combined.length,
+          premiumInvestors: Math.ceil(combined.length * 0.4),
+          topInvestors: combined.slice(0, 5).map(c => ({
             name: c.name,
             aum: c.invested || 2500000,
-            tier: 'HNI Client',
+            tier: 'HNI Investor',
             growth: '+12.4%'
           }))
         }))
@@ -1447,8 +1447,8 @@ function RMDashboard() {
   return (
     <>
       <div className="dash-grid-stats mb-2">
-        <StatCard icon={faUsers} label="Assigned Clients" value={data.assignedClients} sub="Total Book Size" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
-        <StatCard icon={faStar} label="Premium Clients" value={data.premiumClients} sub="HNI Clients" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
+        <StatCard icon={faUsers} label="Assigned Investors" value={data.assignedInvestors} sub="Total Book Size" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faStar} label="Premium Investors" value={data.premiumInvestors} sub="HNI Investors" iconBg="linear-gradient(135deg,#F39C12,#b9770e)" accentColor="#F39C12" />
         <StatCard icon={faPiggyBank} label="Total AUM Book" value={fmtINR(data.aumBook)} sub="All client assets" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
         <StatCard icon={faBriefcase} label="Product Sales" value={data.salesCount} sub="Mutual Funds & Stocks" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
         <StatCard icon={faHandHoldingDollar} label="Revenue MTD" value={fmtINR(data.revenue)} sub="Commission generated" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
@@ -1527,14 +1527,14 @@ function RMDashboard() {
       <div className="dash-grid-cols-2 mb-2">
         <div className="card">
           <div className="flex-between mb-1">
-            <h3>Client Investment Book</h3>
+            <h3>Investor Investment Book</h3>
             <span className="badge" style={{ background: '#dcfce7', color: '#16a34a', fontWeight: 700 }}>Active</span>
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Client</th>
+                  <th>Investor</th>
                   <th>Investment Type</th>
                   <th>Amount</th>
                   <th>Status</th>
@@ -1573,14 +1573,14 @@ function RMDashboard() {
             <table>
               <thead>
                 <tr>
-                  <th>Client</th>
+                  <th>Investor</th>
                   <th>AUM / Value</th>
                   <th>Risk</th>
                   <th>Follow-up</th>
                 </tr>
               </thead>
               <tbody>
-                {data.topClients.map((c, i) => (
+                {data.topInvestors.map((c, i) => (
                   <tr key={i}>
                     <td>
                       <div className="user-cell">
@@ -1629,7 +1629,7 @@ function RMDashboard() {
               <tr>
                 <th>Team Member</th>
                 <th>Role</th>
-                <th>Clients / Cases</th>
+                <th>Investors / Cases</th>
                 <th>MTD Contribution</th>
                 <th>Target %</th>
               </tr>
@@ -1676,7 +1676,7 @@ function RMDashboard() {
 
 function AdvisorDashboard() {
   const [data, setData] = useState({
-    totalClients: 0,
+    totalInvestors: 0,
     todaysMeetings: 0,
     policySold: 0,
     mfSip: 0,
@@ -1700,8 +1700,8 @@ function AdvisorDashboard() {
   return (
     <>
       <div className="dash-grid-stats mb-2">
-        <StatCard icon={faUsers} label="Total Clients" value={data.totalClients} sub="Active portfolio" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
-        <StatCard icon={faCalendarPlus} label="Today's Meetings" value={data.todaysMeetings} sub="Client visits & calls" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
+        <StatCard icon={faUsers} label="Total Investors" value={data.totalInvestors} sub="Active portfolio" iconBg="linear-gradient(135deg,#16a085,#0e6251)" accentColor="#16a085" />
+        <StatCard icon={faCalendarPlus} label="Today's Meetings" value={data.todaysMeetings} sub="Investor visits & calls" iconBg="linear-gradient(135deg,#2980b9,#1e3a72)" accentColor="#2980b9" />
         <StatCard icon={faArrowTrendUp} label="Stock Trades" value={data.policySold} sub="Current Month" iconBg="linear-gradient(135deg,#D12020,#922b21)" accentColor="#D12020" />
         <StatCard icon={faChartLine} label="Mutual Fund SIPs" value={fmtINR(data.mfSip)} sub="Monthly Inflow" iconBg="linear-gradient(135deg,#8e44ad,#6c3483)" accentColor="#8e44ad" />
         <StatCard icon={faHandHoldingDollar} label="Commission" value={fmtINR(data.commission)} sub="Month-to-date" iconBg="linear-gradient(135deg,#25D366,#128c4a)" accentColor="#25D366" />
@@ -1791,7 +1791,7 @@ function AdvisorDashboard() {
           <table>
             <thead>
               <tr>
-                <th>Client</th>
+                <th>Investor</th>
                 <th>Product / Scheme</th>
                 <th>Due Date</th>
                 <th>Amount</th>
@@ -1840,7 +1840,7 @@ function AdvisorDashboard() {
                 <tr>
                   <th>Scheme</th>
                   <th>Avg SIP</th>
-                  <th>Clients</th>
+                  <th>Investors</th>
                   <th>Monthly Amt</th>
                   <th>XIRR</th>
                 </tr>
@@ -1914,14 +1914,14 @@ function AdvisorDashboard() {
 
         <div className="card">
           <div className="flex-between mb-1">
-            <h3>Recent Client Interactions — Live Sales Pipeline</h3>
+            <h3>Recent Investor Interactions — Live Sales Pipeline</h3>
             <span className="badge" style={{ background: '#fef3c7', color: '#92400e' }}>{data.advisees.length} Entries</span>
           </div>
           <div className="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>Client</th>
+                  <th>Investor</th>
                   <th>Product</th>
                   <th>Stage</th>
                   <th>Last Contact</th>
@@ -1975,7 +1975,7 @@ function EmployeeDashboard() {
       salary: { payslipId: 'SLP-2026-0000', month: 'August 2026', basic: 0, hra: 0, incentive: 0, pf: 0, professionalTax: 0, net: 0 },
       notifications: [],
       quickActions: [
-        { icon: faUserPlus, label: 'New Client', color: '#25D366', action: 'new-account' },
+        { icon: faUserPlus, label: 'New Investor', color: '#25D366', action: 'new-account' },
         { icon: faChartLine, label: 'Stocks / Equity', color: '#1d4ed8', action: 'stocks' },
         { icon: faSackDollar, label: 'Mutual Funds', color: '#ca8a04', action: 'mutual-fund' },
         { icon: faFileInvoice, label: 'Reports', color: '#0891b2', action: 'reports' }
@@ -2002,7 +2002,7 @@ function EmployeeDashboard() {
 
         <div className="dash-grid-stats mt-1">
           <StatCard icon={faUsers} label="Today's Customers" value={fmtNum(data.todayCustomers)} sub="Branch Footfall" color="#0B1C3B" />
-          <StatCard icon={faCreditCard} label="Client Onboarding" value={fmtNum(data.accountOpenings)} sub="Demat & MF KYC" color="#25D366" />
+          <StatCard icon={faCreditCard} label="Investor Onboarding" value={fmtNum(data.accountOpenings)} sub="Demat & MF KYC" color="#25D366" />
           <StatCard icon={faClock} label="Pending Verifications" value={fmtNum(data.pendingVerifications)} sub="KYC Queue" color="#F39C12" />
           <StatCard icon={faArrowTrendUp} label="Stock Orders" value={fmtNum(data.loanRequests)} sub="Equity Trades" color="#1d4ed8" />
           <StatCard icon={faChartLine} label="Mutual Fund Requests" value={fmtNum(data.mfRequests)} sub="SIP & Lumpsum" color="#ca8a04" />
@@ -2148,10 +2148,10 @@ function EmployeeDashboard() {
     )
 }
 
-function ClientDashboard() {
+function InvestorDashboard() {
   const user = useAuthStore((s) => s.user)
   const profile = {
-    name: user?.name || 'Client Account',
+    name: user?.name || 'Investor Account',
     customerId: user?.id ? `CUST-${user.id.slice(0, 6)}` : 'CUST-00001',
     mobile: user?.phone || '+91 00000 00000',
     email: user?.email || 'client@genius.com',
@@ -2245,7 +2245,7 @@ function ClientDashboard() {
   }
 
   const handleDownloadStatementPDF = () => {
-    const clientName = profile.name || user?.name || 'Valued Client'
+    const clientName = profile.name || user?.name || 'Valued Investor'
     const clientId = profile.customerId || 'CUST-00001'
     const dateStr = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
@@ -2302,7 +2302,7 @@ function ClientDashboard() {
     const htmlContent = `
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
         <table style="width: 100%; border: none; margin: 0;">
-          <tr style="background: none;"><td style="border: none; padding: 3px 0;"><strong>Client Name:</strong> ${clientName}</td><td style="border: none; padding: 3px 0;"><strong>Account ID:</strong> ${clientId}</td></tr>
+          <tr style="background: none;"><td style="border: none; padding: 3px 0;"><strong>Investor Name:</strong> ${clientName}</td><td style="border: none; padding: 3px 0;"><strong>Account ID:</strong> ${clientId}</td></tr>
           <tr style="background: none;"><td style="border: none; padding: 3px 0;"><strong>PAN:</strong> ${profile.pan || '—'}</td><td style="border: none; padding: 3px 0;"><strong>Email:</strong> ${profile.email || '—'}</td></tr>
           <tr style="background: none;"><td style="border: none; padding: 3px 0;"><strong>Statement Date:</strong> ${dateStr}</td><td style="border: none; padding: 3px 0;"><strong>Total Valuation:</strong> ${fmtINR(totalValue)}</td></tr>
         </table>
@@ -2354,11 +2354,11 @@ function ClientDashboard() {
       </table>
     `
 
-    printHTML(`Client Statement — ${clientName} (${clientId})`, htmlContent)
+    printHTML(`Investor Statement — ${clientName} (${clientId})`, htmlContent)
   }
 
   const handleExportExcel = () => {
-    const clientId = profile.customerId || 'Client'
+    const clientId = profile.customerId || 'Investor'
     const headers = ['Date', 'Order Particulars', 'Type', 'Amount (INR)']
     let rows = []
     if (recentTxns && recentTxns.length > 0) {
@@ -2576,7 +2576,7 @@ function ClientDashboard() {
         </div>
 
         <div className="card">
-          <h3 className="mb-1">💬 Client Support & Queries</h3>
+          <h3 className="mb-1">💬 Investor Support & Queries</h3>
           <div style={{ marginTop: '0.5rem' }}>
             <SupportTickets tickets={tickets} onRaiseTicket={() => setShowTicketModal(true)} />
           </div>
@@ -2873,7 +2873,7 @@ const RoleHeader = ({ title, subtitle, icon, activeRoleView, onSwitchRoleView })
               <option value="advisor">Advisor View</option>
               <option value="sub_broker">Sub Broker View</option>
               <option value="employee">Employee View</option>
-              <option value="client">Client View</option>
+              <option value="client">Investor View</option>
             </select>
           </div>
         )}
@@ -2984,17 +2984,17 @@ export default function DashboardRole() {
         return <EmployeeDashboard />
       case 'client':
       default:
-        return <ClientDashboard />
+        return <InvestorDashboard />
     }
   }
 
   const roleTitles = {
     admin: 'Admin Management & Operations Portal',
     branch_manager: 'Branch Manager Operations & Performance Portal',
-    rm: 'Relationship Manager Portfolio & Client Portal',
+    rm: 'Relationship Manager Portfolio & Investor Portal',
     arm: 'Assistant RM Operations & Workflow Portal',
     advisor: 'Wealth Advisor Advisory & Planning Portal',
-    sub_broker: 'Sub Broker Channel & Client Acquisition Portal',
+    sub_broker: 'Sub Broker Channel & Investor Acquisition Portal',
     employee: 'Employee Operations & Daily Workflow Dashboard',
     client: 'Investor Wealth & Portfolio Dashboard'
   }

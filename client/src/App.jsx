@@ -10,12 +10,12 @@ import { useAuthStore } from './store/auth'
 import RequireAuth from './components/RequireAuth'
 import AppLayout from './components/AppLayout'
 import Login from './pages/Login'
-import ClientSignup from './pages/ClientSignup'
+import InvestorSignup from './pages/InvestorSignup'
 import DashboardRole from './pages/DashboardRole'
 import AdminUsers from './pages/AdminUsers'
-import ClientReports from './pages/ClientReports'
-import ClientProfile from './pages/ClientProfile'
-import ClientsList from './pages/ClientsList'
+import InvestorReports from './pages/InvestorReports'
+import InvestorProfile from './pages/InvestorProfile'
+import InvestorsList from './pages/InvestorsList'
 import Compare from './pages/Compare'
 import Market from './pages/Market'
 import LandingPage from './pages/LandingPage'
@@ -83,7 +83,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/portal" element={<PortalRedirect />} />
         <Route path="/portal/login" element={<Login />} />
-        <Route path="/portal/signup" element={<ClientSignup />} />
+        <Route path="/portal/signup" element={<InvestorSignup />} />
 
         <Route
           path="/app"
@@ -116,7 +116,7 @@ export default function App() {
             path="clients"
             element={
               <RequireAuth allowedRoles={['admin', 'branch_manager', 'arm', 'rm', 'advisor', 'sub_broker', 'employee']}>
-                <ClientsList />
+                <InvestorsList />
               </RequireAuth>
             }
           />
@@ -128,8 +128,8 @@ export default function App() {
               </RequireAuth>
             }
           />
-          <Route path="reports" element={<ClientReports />} />
-          <Route path="profile" element={<ClientProfile />} />
+          <Route path="reports" element={<InvestorReports />} />
+          <Route path="profile" element={<InvestorProfile />} />
           <Route path="compare" element={<Compare />} />
           <Route path="market" element={<Market />} />
         </Route>

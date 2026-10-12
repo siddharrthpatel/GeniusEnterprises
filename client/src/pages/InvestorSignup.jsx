@@ -30,7 +30,7 @@ const MAX_DOB = (() => {
 
 const sanitizePhoneDigits = (val) => String(val || '').replace(/\D/g, '').slice(0, 10)
 
-export default function ClientSignup() {
+export default function InvestorSignup() {
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', phone: '', pan: '', dob: '' })
   const [errors, setErrors] = useState({ name: '', email: '', password: '', confirm: '', phone: '', pan: '', dob: '' })
   const [touched, setTouched] = useState({ name: false, email: false, password: false, confirm: false, phone: false, pan: false, dob: false })
@@ -154,7 +154,7 @@ export default function ClientSignup() {
         authSource = 'local'
         user = {
           id: 'local-client-' + Date.now().toString(36),
-          name: form.name || 'New Client',
+          name: form.name || 'New Investor',
           email: form.email,
           role: 'client',
           status: 'active',

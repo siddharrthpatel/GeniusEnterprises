@@ -4,8 +4,8 @@ require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
 require('dotenv').config();
 
-const { createClient: createBrowserClient } = require('@supabase/supabase-js');
-const { createServerClient } = require('@supabase/ssr');
+const { createInvestor: createBrowserInvestor } = require('@supabase/supabase-js');
+const { createServerInvestor } = require('@supabase/ssr');
 
 const supabaseUrl =
   process.env.SUPABASE_URL ||
@@ -23,11 +23,11 @@ const rawServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseServiceKey =
   rawServiceKey && !rawServiceKey.startsWith('CHANGE_ME') ? rawServiceKey : null;
 
-const createClient = () =>
-  createBrowserClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
+const createInvestor = () =>
+  createBrowserInvestor(supabaseUrl, supabaseServiceKey || supabaseAnonKey);
 
-const createSsrClient = (req, res) => {
-  return createServerClient(supabaseUrl, supabaseAnonKey, {
+const createSsrInvestor = (req, res) => {
+  return createServerInvestor(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return Object.entries(req.cookies || {}).map(([name, value]) => ({
@@ -51,13 +51,13 @@ const createSsrClient = (req, res) => {
   })
 }
 
-const supabase = createClient()
+const supabase = createInvestor()
 
 module.exports = {
   supabase,
   default: supabase,
-  createClient,
-  createSsrClient,
+  createInvestor,
+  createSsrInvestor,
   supabaseUrl,
   supabaseAnonKey,
   supabaseServiceKey,

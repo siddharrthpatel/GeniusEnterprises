@@ -135,7 +135,7 @@ export const roleLabel = (role) => {
     advisor: 'Advisor',
     sub_broker: 'Sub Broker',
     employee: 'Employee',
-    client: 'Client'
+    client: 'Investor'
   }
   return map[role] || String(role || 'User').charAt(0).toUpperCase() + String(role || '').slice(1)
 }

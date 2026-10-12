@@ -1,4 +1,4 @@
--- Incremental: add master_admin / sub_broker + platform control tables
+﻿-- Incremental: add master_admin / sub_broker + platform control tables
 -- Use this if 0001/0002 already ran. For a brand-new project use supabase/IMPORT_ME.sql instead.
 
 create schema if not exists internal;
@@ -132,7 +132,7 @@ insert into public.dashboard_modules (id, label, role, is_active) values
   ('advisor', 'Advisor', 'advisor', true),
   ('sub_broker', 'Sub Broker', 'sub_broker', true),
   ('employee', 'Employee', 'employee', true),
-  ('client', 'Client', 'client', true)
+  ('client', 'Investor', 'client', true)
 on conflict (id) do nothing;
 
 insert into public.platform_settings (key, value, is_secret) values

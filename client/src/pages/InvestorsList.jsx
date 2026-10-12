@@ -22,7 +22,7 @@ import { useAuthStore, saveLocalUser, getLocalUsersList, deleteLocalUser } from 
 import { fmtINR, fmtPct, initials, roleLabel, downloadCSV, downloadExcel, printHTML, rowsToHTMLTable, validateIndianPhone, validateIndianPAN, normalizeIndianPhone, normalizePAN, validateStrongPassword } from '../utils/format'
 import api from '../api'
 
-const sampleClients = []
+const sampleInvestors = []
 
 const emptyCustomerForm = {
   name: '', email: '', phone: '', pan: '', dob: '',
@@ -57,9 +57,9 @@ async function tryServerDownload(url, filename) {
   return false
 }
 
-export default function ClientsList() {
+export default function InvestorsList() {
   const user = useAuthStore((s) => s.user)
-  const [clients, setClients] = useState([])
+  const [clients, setInvestors] = useState([])
   const [staffUsers, setStaffUsers] = useState([])
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
@@ -71,7 +71,7 @@ export default function ClientsList() {
   const [addSuccess, setAddSuccess] = useState('')
   const [adding, setAdding] = useState(false)
 
-  // Delete Client modal & action
+  // Delete Investor modal & action
   const [delConfirm, setDelConfirm] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const [delError, setDelError] = useState('')
@@ -80,7 +80,7 @@ export default function ClientsList() {
   const isPrivileged = user?.role === 'admin'
   const canAddCustomer = isStaff
 
-  const handleDeleteClient = async () => {
+  const handleDeleteInvestor = async () => {
     if (!delConfirm) return
     setDeleting(true)
     setDelError('')
@@ -90,7 +90,7 @@ export default function ClientsList() {
     try {
       deleteLocalUser(delConfirm.id)
       deleteLocalUser(delConfirm.email)
-      setClients((prev) => prev.filter((c) => c.id !== delConfirm.id && c.email?.toLowerCase() !== delConfirm.email?.toLowerCase()))
+      setInvestors((prev) => prev.filter((c) => c.id !== delConfirm.id && c.email?.toLowerCase() !== delConfirm.email?.toLowerCase()))
       setDelConfirm(null)
     } catch (err) {
       setDelError(err.response?.data?.error || err.message || 'Failed to delete client')
@@ -105,11 +105,11 @@ export default function ClientsList() {
 
   useEffect(() => {
     const load = async () => {
-      let serverClients = []
+      let serverInvestors = []
       try {
         const res = await api.get('/users?role=client')
         if (res.data && res.data.users) {
-          serverClients = res.data.users.map(u => ({
+          serverInvestors = res.data.users.map(u => ({
             id: u.id || u._id,
             name: u.name, email: u.email, phone: u.phone, pan: u.pan,
             invested: u.invested || 0,
@@ -129,7 +129,7 @@ export default function ClientsList() {
       }
 
       // Merge local storage customers so newly added or signed-up customers are always visible
-      const localClients = getLocalUsersList()
+      const localInvestors = getLocalUsersList()
         .filter(u => u.role === 'client' || (!u.role && u.email && !u.email.endsWith('@genius.com')))
         .map(u => ({
           id: u.id || 'c_' + (u.email || Math.random().toString(36)),
@@ -145,13 +145,13 @@ export default function ClientsList() {
           advisorName: u.advisorName || '—'
         }))
 
-      const combined = [...serverClients]
-      for (const lc of localClients) {
+      const combined = [...serverInvestors]
+      for (const lc of localInvestors) {
         if (!combined.some(c => c.email?.toLowerCase() === lc.email?.toLowerCase() || (c.id && c.id === lc.id))) {
           combined.unshift(lc)
         }
       }
-      setClients(combined)
+      setInvestors(combined)
     }
     load()
   }, [])
@@ -235,7 +235,7 @@ export default function ClientsList() {
 
       const rmUser = staffUsers.find(u => u.id === addForm.rmId)
       const advUser = staffUsers.find(u => u.id === addForm.advisorId)
-      const newClient = {
+      const newInvestor = {
         id: newId,
         name: payload.name,
         email: payload.email,
@@ -248,7 +248,7 @@ export default function ClientsList() {
         rmName: rmUser?.name || '—',
         advisorName: advUser?.name || '—'
       }
-      setClients(prev => [newClient, ...prev])
+      setInvestors(prev => [newInvestor, ...prev])
       saveLocalUser({
         ...payload,
         id: newId,
@@ -271,10 +271,10 @@ export default function ClientsList() {
       const ok = await tryServerDownload(`/reports/portfolio/${c.id}.pdf`, fname + '.pdf')
       if (!ok) {
         const html =
-          `<h2>Client Details</h2>
+          `<h2>Investor Details</h2>
            <table><tbody>
              <tr><th>Name</th><td>${c.name}</td></tr>
-             <tr><th>Client ID</th><td>${c.id}</td></tr>
+             <tr><th>Investor ID</th><td>${c.id}</td></tr>
              <tr><th>Email</th><td>${c.email || '—'}</td></tr>
              <tr><th>Phone</th><td>${c.phone || '—'}</td></tr>
              <tr><th>PAN</th><td>${c.pan || '—'}</td></tr>
@@ -298,7 +298,7 @@ export default function ClientsList() {
       const ok = await tryServerDownload(`/reports/portfolio/${c.id}.xlsx`, fname + '.xlsx')
       if (!ok) {
         downloadExcel(
-          ['Client ID', 'Name', 'Email', 'Phone', 'PAN', 'RM', 'Advisor', 'Invested', 'Current', 'Net Return', 'Return %', 'Status', 'Joined'],
+          ['Investor ID', 'Name', 'Email', 'Phone', 'PAN', 'RM', 'Advisor', 'Invested', 'Current', 'Net Return', 'Return %', 'Status', 'Joined'],
           [[
             c.id, c.name, c.email || '', c.phone || '', c.pan || '',
             c.rmName || '', c.advisorName || '',
@@ -314,8 +314,8 @@ export default function ClientsList() {
     }
   }
 
-  function downloadAllClientsCSV() {
-    const headers = ['Client ID', 'Name', 'Email', 'Phone', 'PAN', 'RM', 'Advisor', 'Invested (₹)', 'Current (₹)', 'Net Return (₹)', 'Return %', 'Status', 'Joined']
+  function downloadAllInvestorsCSV() {
+    const headers = ['Investor ID', 'Name', 'Email', 'Phone', 'PAN', 'RM', 'Advisor', 'Invested (₹)', 'Current (₹)', 'Net Return (₹)', 'Return %', 'Status', 'Joined']
     const rows = filtered.map(c => [
       c.id, c.name, c.email || '', c.phone || '', c.pan || '',
       c.rmName || '', c.advisorName || '',
@@ -325,11 +325,11 @@ export default function ClientsList() {
       c.status || 'active',
       c.joined ? new Date(c.joined).toLocaleDateString('en-IN') : ''
     ])
-    downloadCSV(headers, rows, `Genius_All_Clients_${new Date().toISOString().slice(0,10)}`)
+    downloadCSV(headers, rows, `Genius_All_Investors_${new Date().toISOString().slice(0,10)}`)
   }
 
-  function downloadAllClientsPDF() {
-    const headers = ['Client ID', 'Name', 'Email', 'Phone', 'PAN', 'Invested', 'Current', 'Return %', 'Status']
+  function downloadAllInvestorsPDF() {
+    const headers = ['Investor ID', 'Name', 'Email', 'Phone', 'PAN', 'Invested', 'Current', 'Return %', 'Status']
     const rows = filtered.map(c => [
       c.id, c.name, c.email || '', c.phone || '', c.pan || '',
       fmtINR(c.invested), fmtINR(c.current),
@@ -337,14 +337,14 @@ export default function ClientsList() {
       c.status || 'active'
     ])
     const totalsRow = [
-      'TOTAL', `${filtered.length} Clients`, '', '', '',
+      'TOTAL', `${filtered.length} Investors`, '', '', '',
       fmtINR(totals.invested), fmtINR(totals.current),
       fmtPct(netReturn), ''
     ]
     const html =
       `<h2>Summary</h2>
        <table>
-         <tr><th>Total Clients</th><th>Active</th><th>Total Invested</th><th>Total Current Value</th><th>Net Return %</th></tr>
+         <tr><th>Total Investors</th><th>Active</th><th>Total Invested</th><th>Total Current Value</th><th>Net Return %</th></tr>
          <tr class="summary-row">
            <td>${filtered.length}</td>
            <td>${filtered.filter(c=>c.status==='active').length}</td>
@@ -353,9 +353,9 @@ export default function ClientsList() {
            <td class="${netReturn>=0?'success':'danger'}">${fmtPct(netReturn)}</td>
          </tr>
        </table>
-       <h2>Complete Client Directory (${filtered.length})</h2>` +
+       <h2>Complete Investor Directory (${filtered.length})</h2>` +
        rowsToHTMLTable(headers, rows, { totalsRow })
-    printHTML('Complete Client Data', html)
+    printHTML('Complete Investor Data', html)
   }
 
   function downloadAllUsersCSV() {
@@ -379,7 +379,7 @@ export default function ClientsList() {
     const html =
       `<h2>Summary</h2>
        <table>
-         <tr><th>Total Users</th><th>Admin</th><th>Branch Managers (BM)</th><th>RMs</th><th>ARMs</th><th>Advisors</th><th>Sub Brokers</th><th>Employees</th><th>Clients</th></tr>
+         <tr><th>Total Users</th><th>Admin</th><th>Branch Managers (BM)</th><th>RMs</th><th>ARMs</th><th>Advisors</th><th>Sub Brokers</th><th>Employees</th><th>Investors</th></tr>
          <tr class="summary-row">
            <td>${all.length}</td>
            <td>${all.filter(u => u.role === 'admin').length}</td>
@@ -401,7 +401,7 @@ export default function ClientsList() {
     <div className="page">
       <div className="page-title">
         <div>
-          <h1>Clients Directory</h1>
+          <h1>Investors Directory</h1>
           <p className="text-muted mb-0" style={{ marginTop: 4 }}>{filtered.length} of {clients.length} clients shown</p>
         </div>
         <div className="page-actions" style={{ flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -412,11 +412,11 @@ export default function ClientsList() {
           )}
           {isPrivileged && (
             <div className="page-actions" style={{ display: 'contents' }}>
-              <button className="btn-outline btn-sm" onClick={downloadAllClientsCSV} title="Download all filtered clients as CSV/Excel">
-                <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: 6 }} /> Clients CSV
+              <button className="btn-outline btn-sm" onClick={downloadAllInvestorsCSV} title="Download all filtered clients as CSV/Excel">
+                <FontAwesomeIcon icon={faFileExcel} style={{ marginRight: 6 }} /> Investors CSV
               </button>
-              <button className="btn-outline btn-sm" onClick={downloadAllClientsPDF} title="Print all clients as PDF report">
-                <FontAwesomeIcon icon={faFilePdf} style={{ marginRight: 6 }} /> Clients PDF
+              <button className="btn-outline btn-sm" onClick={downloadAllInvestorsPDF} title="Print all clients as PDF report">
+                <FontAwesomeIcon icon={faFilePdf} style={{ marginRight: 6 }} /> Investors PDF
               </button>
               <button className="btn-primary btn-sm" onClick={downloadAllUsersCSV} title="Download ALL users (staff + clients) as CSV">
                 <FontAwesomeIcon icon={faDownload} style={{ marginRight: 6 }} /> All Users CSV
@@ -433,7 +433,7 @@ export default function ClientsList() {
         <div className="stat-card">
           <div className="stat-icon"><FontAwesomeIcon icon={faUsers} /></div>
           <div className="stat-content">
-            <div className="stat-label">Total Clients</div>
+            <div className="stat-label">Total Investors</div>
             <div className="stat-value">{filtered.length}</div>
             <div className="stat-sub">Filtered list</div>
           </div>
@@ -441,7 +441,7 @@ export default function ClientsList() {
         <div className="stat-card">
           <div className="stat-icon"><FontAwesomeIcon icon={faUsers} /></div>
           <div className="stat-content">
-            <div className="stat-label">Active Clients</div>
+            <div className="stat-label">Active Investors</div>
             <div className="stat-value">{filtered.filter(c => c.status === 'active').length}</div>
             <div className="stat-sub">{Math.round(filtered.filter(c => c.status === 'active').length / Math.max(1, filtered.length) * 100)}% active</div>
           </div>
@@ -485,7 +485,7 @@ export default function ClientsList() {
           <table>
             <thead>
               <tr>
-                <th>Client</th>
+                <th>Investor</th>
                 <th>Phone / PAN</th>
                 <th>RM / Advisor</th>
                 <th>Invested</th>
@@ -550,9 +550,9 @@ export default function ClientsList() {
                                 fontWeight: 600,
                                 whiteSpace: 'nowrap'
                               }}
-                              title="Delete Client"
+                              title="Delete Investor"
                             >
-                              <FontAwesomeIcon icon={faTrashCan} size="xs" /> Delete Client
+                              <FontAwesomeIcon icon={faTrashCan} size="xs" /> Delete Investor
                             </button>
                           )}
                         </div>
@@ -593,7 +593,7 @@ export default function ClientsList() {
                 <div className="form-row">
                   <div className="form-group">
                     <label>Password * <span style={{ fontSize: '0.72rem', color: '#64748b', fontWeight: 'normal' }}>(8+ chars: Capital, small, number, symbol)</span></label>
-                    <input type="password" value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} placeholder="Min. 8 chars (e.g. Client@123)" minLength={8} required />
+                    <input type="password" value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} placeholder="Min. 8 chars (e.g. Investor@123)" minLength={8} required />
                   </div>
                   <div className="form-group">
                     <label>Phone</label>
@@ -669,7 +669,7 @@ export default function ClientsList() {
           <div className="modal-box" style={{ maxWidth: 460 }}>
             <div className="modal-head" style={{ borderBottom: '1px solid #fee2e2' }}>
               <h3 style={{ color: '#b91c1c', display: 'flex', alignItems: 'center', gap: 8, margin: 0 }}>
-                <FontAwesomeIcon icon={faTriangleExclamation} /> Delete Client Account
+                <FontAwesomeIcon icon={faTriangleExclamation} /> Delete Investor Account
               </h3>
               <button type="button" className="modal-close" onClick={() => !deleting && setDelConfirm(null)}>
                 <FontAwesomeIcon icon={faXmark} />
@@ -692,7 +692,7 @@ export default function ClientsList() {
                 type="button"
                 className="btn-danger"
                 disabled={deleting}
-                onClick={handleDeleteClient}
+                onClick={handleDeleteInvestor}
                 style={{
                   background: '#dc2626',
                   color: '#ffffff',
@@ -707,7 +707,7 @@ export default function ClientsList() {
                 }}
               >
                 <FontAwesomeIcon icon={faTrashCan} />
-                {deleting ? 'Deleting…' : 'Delete Client'}
+                {deleting ? 'Deleting…' : 'Delete Investor'}
               </button>
             </div>
           </div>

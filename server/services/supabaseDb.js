@@ -1,7 +1,7 @@
 ﻿/** (developed by @neelotpal.dey) **/
 const fs = require('fs');
 const path = require('path');
-const { createClient } = require('@supabase/supabase-js');
+const { createInvestor } = require('@supabase/supabase-js');
 const bcrypt = require('bcryptjs');
 
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://drkxuilxrhjjcixeuftj.supabase.co';
@@ -16,7 +16,7 @@ const supabaseServiceKey =
   rawServiceKey && !rawServiceKey.startsWith('CHANGE_ME') ? rawServiceKey : null;
 
 // Primary server client
-let client = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey, {
+let client = createInvestor(supabaseUrl, supabaseServiceKey || supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
@@ -26,7 +26,7 @@ let client = createClient(supabaseUrl, supabaseServiceKey || supabaseAnonKey, {
 let adminSession = null;
 let adminSessionExpiresAt = 0;
 
-async function getAdminClient() {
+async function getAdminInvestor() {
   if (supabaseServiceKey) return client;
   const now = Date.now();
   if (adminSession && now < adminSessionExpiresAt) {
@@ -134,7 +134,7 @@ async function resolveEmail(identifier) {
   const lower = trimmed.toLowerCase();
   if (USERNAME_MAP[lower]) return USERNAME_MAP[lower];
   try {
-    const sb = await getAdminClient();
+    const sb = await getAdminInvestor();
     const { data: p } = await sb
       .from('profiles')
       .select('email')
@@ -148,7 +148,7 @@ async function resolveEmail(identifier) {
 async function getUserById(id) {
   if (!id || isDeleted(id)) return null;
   try {
-    const sb = await getAdminClient();
+    const sb = await getAdminInvestor();
     const { data: p, error } = await sb
       .from('profiles')
       .select('*')
@@ -209,7 +209,7 @@ async function getUserById(id) {
 async function getUserByEmail(email) {
   if (!email || isDeleted(email)) return null;
   try {
-    const sb = await getAdminClient();
+    const sb = await getAdminInvestor();
     const { data: p, error } = await sb
       .from('profiles')
       .select('*')
@@ -235,7 +235,7 @@ async function getUserByEmail(email) {
 async function getUserByUsername(username) {
   if (!username || isDeleted(username)) return null;
   try {
-    const sb = await getAdminClient();
+    const sb = await getAdminInvestor();
     const { data: p, error } = await sb
       .from('profiles')
       .select('*')
@@ -255,8 +255,8 @@ async function authenticateWithSupabase(identifier, password, requestedRole) {
   if (!email || isDeleted(email)) return { user: null, error: 'User does not exist or has been removed' };
 
   // Create temporary client for this login attempt
-  const tempClient = createClient(supabaseUrl, supabaseAnonKey);
-  const { data: authData, error: authError } = await tempClient.auth.signInWithPassword({
+  const tempInvestor = createInvestor(supabaseUrl, supabaseAnonKey);
+  const { data: authData, error: authError } = await tempInvestor.auth.signInWithPassword({
     email,
     password,
   });
@@ -293,7 +293,7 @@ async function getUsers(filter = {}) {
     if (cache.users && now - cache.usersAt < CACHE_TTL_MS) {
       all = cache.users;
     } else {
-      const sb = await getAdminClient();
+      const sb = await getAdminInvestor();
       const { data: profiles, error } = await sb
         .from('profiles')
         .select('*')
@@ -375,7 +375,7 @@ async function addUser(userData) {
     saveCustomUsers(currentCustom);
 
     try {
-      const sb = await getAdminClient();
+      const sb = await getAdminInvestor();
       const profileRow = {
         id,
         name: userData.name,
@@ -409,10 +409,10 @@ async function addUser(userData) {
 
 async function createSupabaseAuthUser(userData) {
   try {
-    const temp = createClient(supabaseUrl, supabaseAnonKey);
+    const temp = createInvestor(supabaseUrl, supabaseAnonKey);
     const { data, error } = await temp.auth.signUp({
       email: userData.email,
-      password: userData.rawPassword || 'Client@123',
+      password: userData.rawPassword || 'Investor@123',
       options: {
         data: {
           name: userData.name,
@@ -428,7 +428,7 @@ async function createSupabaseAuthUser(userData) {
 async function updateUser(id, patch) {
   try {
     clearCache();
-    const sb = await getAdminClient();
+    const sb = await getAdminInvestor();
     const profilePatch = {};
     if (patch.name !== undefined) profilePatch.name = patch.name;
     if (patch.email !== undefined) profilePatch.email = patch.email;
@@ -468,7 +468,7 @@ async function deleteUser(id) {
     if (existing?.username) markDeleted(existing.username);
     const updatedCustom = loadCustomUsers().filter((u) => u.id !== id && u.email?.toLowerCase() !== existing?.email?.toLowerCase());
     saveCustomUsers(updatedCustom);
-    const sb = await getAdminClient();
+    const sb = await getAdminInvestor();
     try {
       await sb.from('clients').delete().eq('user_id', id);
     } catch (_) {}
@@ -509,7 +509,7 @@ async function getPortfolio(userId) {
       return JSON.parse(JSON.stringify(cache.portfolios[userId]));
     }
 
-    const sb = await getAdminClient();
+    const sb = await getAdminInvestor();
     const { data: clientRecord } = await sb
       .from('clients')
       .select('id')
@@ -615,7 +615,7 @@ async function getUserByIdentifier(ident) {
 }
 
 module.exports = {
-  getAdminClient,
+  getAdminInvestor,
   resolveEmail,
   getUserById,
   getUserByEmail,

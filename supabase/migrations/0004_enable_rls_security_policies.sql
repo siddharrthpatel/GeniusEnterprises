@@ -1,4 +1,4 @@
--- =============================================================================
+﻿-- =============================================================================
 -- Genius Enterprises — Row Level Security (RLS) & Access Control Migration
 -- Run in Supabase SQL Editor to protect all public tables against unauthorized access.
 -- =============================================================================

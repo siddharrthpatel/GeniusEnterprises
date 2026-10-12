@@ -35,23 +35,23 @@ const roleLinks = {
     { to: '/app/dashboard', label: 'Dashboard', icon: faGaugeHigh },
     { to: '/app/platform', label: 'Platform Controls', icon: faShieldHalved },
     { to: '/app/users', label: 'Manage Users', icon: faUsers },
-    { to: '/app/clients', label: 'Clients & Customers', icon: faUserGroup },
+    { to: '/app/clients', label: 'Investors & Customers', icon: faUserGroup },
     { to: '/app/compare', label: 'Compare Market', icon: faScaleBalanced }
   ],
   branch_manager: [
     { to: '/app/dashboard', label: 'Dashboard', icon: faGaugeHigh },
     { to: '/app/users', label: 'Team & Staff', icon: faUsers },
-    { to: '/app/clients', label: 'Clients & Customers', icon: faUserGroup },
+    { to: '/app/clients', label: 'Investors & Customers', icon: faUserGroup },
     { to: '/app/compare', label: 'Compare Market', icon: faScaleBalanced }
   ],
   arm: [
     { to: '/app/dashboard', label: 'Dashboard', icon: faGaugeHigh },
-    { to: '/app/clients', label: 'Clients & Customers', icon: faUserGroup },
+    { to: '/app/clients', label: 'Investors & Customers', icon: faUserGroup },
     { to: '/app/compare', label: 'Compare Market', icon: faScaleBalanced }
   ],
   rm: [
     { to: '/app/dashboard', label: 'Dashboard', icon: faGaugeHigh },
-    { to: '/app/clients', label: 'Clients & Customers', icon: faUserGroup },
+    { to: '/app/clients', label: 'Investors & Customers', icon: faUserGroup },
     { to: '/app/compare', label: 'Compare Market', icon: faScaleBalanced }
   ],
   advisor: [
@@ -61,12 +61,12 @@ const roleLinks = {
   ],
   sub_broker: [
     { to: '/app/dashboard', label: 'Dashboard', icon: faGaugeHigh },
-    { to: '/app/clients', label: 'My Clients & Customers', icon: faUserGroup },
+    { to: '/app/clients', label: 'My Investors & Customers', icon: faUserGroup },
     { to: '/app/compare', label: 'Compare Market', icon: faScaleBalanced }
   ],
   employee: [
     { to: '/app/dashboard', label: 'Dashboard', icon: faGaugeHigh },
-    { to: '/app/clients', label: 'Clients & Customers', icon: faUserGroup },
+    { to: '/app/clients', label: 'Investors & Customers', icon: faUserGroup },
     { to: '/app/compare', label: 'Compare Market', icon: faScaleBalanced }
   ],
   client: [

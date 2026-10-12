@@ -28,7 +28,7 @@ const DEFAULT_DASHBOARDS = [
   { id: 'advisor', label: 'Advisor Dashboard', role: 'advisor', isActive: true },
   { id: 'sub_broker', label: 'Sub Broker Dashboard', role: 'sub_broker', isActive: true },
   { id: 'employee', label: 'Employee Dashboard', role: 'employee', isActive: true },
-  { id: 'client', label: 'Client / Investor Portal', role: 'client', isActive: true }
+  { id: 'client', label: 'Investor / Investor Portal', role: 'client', isActive: true }
 ]
 
 const REFRESH_INTERVAL_PRESETS = [
@@ -71,9 +71,9 @@ const defaultMarketConfig = () => ({
 const LOCAL_PLATFORM_KEY = 'ge_local_platform'
 
 const DATA_SCOPES = [
-  { id: 'portfolio', label: 'Portfolio & Holdings', description: 'Client portfolio, holdings, SIP/MF/FD data' },
+  { id: 'portfolio', label: 'Portfolio & Holdings', description: 'Investor portfolio, holdings, SIP/MF/FD data' },
   { id: 'reports', label: 'Reports & Statements', description: 'Download PDF/Excel reports and statements' },
-  { id: 'clients', label: 'Client Data', description: 'View and manage client profiles and KYC records' },
+  { id: 'clients', label: 'Investor Data', description: 'View and manage client profiles and KYC records' },
   { id: 'market', label: 'Market Data', description: 'Live market prices, indices, gainers/losers' },
   { id: 'profile', label: 'User Profile', description: 'Personal profile and account information' },
   { id: 'documents', label: 'Documents & KYC', description: 'Upload and view KYC documents' },
@@ -90,10 +90,10 @@ const DEFAULT_API_ACCESS = () => {
     for (const scope of DATA_SCOPES) {
       const isAdmin = role === 'admin'
       const isStaff = ['admin', 'branch_manager', 'rm', 'arm', 'advisor', 'sub_broker', 'employee'].includes(role)
-      const isClient = role === 'client'
+      const isInvestor = role === 'client'
       access[role][scope.id] = {
-        read: isAdmin || (isStaff && ['portfolio', 'reports', 'clients', 'market', 'profile', 'analytics'].includes(scope.id)) || (isClient && ['portfolio', 'reports', 'market', 'profile', 'documents'].includes(scope.id)),
-        write: isAdmin || (isStaff && !isClient && ['portfolio', 'clients', 'documents', 'transactions'].includes(scope.id)),
+        read: isAdmin || (isStaff && ['portfolio', 'reports', 'clients', 'market', 'profile', 'analytics'].includes(scope.id)) || (isInvestor && ['portfolio', 'reports', 'market', 'profile', 'documents'].includes(scope.id)),
+        write: isAdmin || (isStaff && !isInvestor && ['portfolio', 'clients', 'documents', 'transactions'].includes(scope.id)),
       }
     }
   }
@@ -950,7 +950,7 @@ export default function MasterAdmin({ mode = 'full' }) {
                 <span>Audience</span>
                 <select value={draft.audience} onChange={(e) => setDraft({ ...draft, audience: e.target.value })}>
                   <option value="all">All roles</option>
-                  <option value="client">Clients</option>
+                  <option value="client">Investors</option>
                   <option value="employee">Employees</option>
                   <option value="rm">RMs</option>
                   <option value="advisor">Advisors</option>

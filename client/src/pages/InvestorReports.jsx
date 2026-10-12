@@ -32,11 +32,11 @@ const mockTransactions = [
   ['2026-05-20', 'SIP', 'SBI Small Cap Fund', 10000, 200, 50.00],
 ]
 
-export default function ClientReports() {
+export default function InvestorReports() {
   const user = useAuthStore((s) => s.user)
-  const isClient = user?.role === 'client'
-  const [selectedClient, setSelectedClient] = useState('')
-  const [clients, setClients] = useState([])
+  const isInvestor = user?.role === 'client'
+  const [selectedInvestor, setSelectedInvestor] = useState('')
+  const [clients, setInvestors] = useState([])
   const [busy, setBusy] = useState({ pdf: false, xlsx: false })
   const [summary, setSummary] = useState({
     invested: 4800000,
@@ -63,18 +63,18 @@ export default function ClientReports() {
           combined.unshift(lc)
         }
       }
-      setClients(combined.length ? combined : [
+      setInvestors(combined.length ? combined : [
         { id: 'c1', name: 'Meera Reddy', email: 'meera@example.com', phone: '+91 9810000008', pan: 'CLMR1234H' },
         { id: 'c2', name: 'Rajesh Khanna', email: 'rajesh@example.com', phone: '+91 9810000009', pan: 'CLRK1234I' },
       ])
     }
-    if (!isClient) load()
-  }, [isClient])
+    if (!isInvestor) load()
+  }, [isInvestor])
 
-  const targetId = isClient ? (user?.id || 'c1') : selectedClient
-  const targetClient = isClient
+  const targetId = isInvestor ? (user?.id || 'c1') : selectedInvestor
+  const targetInvestor = isInvestor
     ? user || clients[0]
-    : clients.find(c => c.id === selectedClient) || clients[0]
+    : clients.find(c => c.id === selectedInvestor) || clients[0]
 
   async function tryServerDownload(url, filename, type) {
     try {
@@ -104,17 +104,17 @@ export default function ClientReports() {
     if (!targetId) return
     setBusy(b => ({ ...b, pdf: true }))
     try {
-      const fname = `Portfolio_${(targetClient?.name || 'report').replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`
+      const fname = `Portfolio_${(targetInvestor?.name || 'report').replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`
       const ok = await tryServerDownload(`/reports/portfolio/${targetId}.pdf`, fname, 'pdf')
       if (!ok) {
         const html =
-          `<h2>Client Details</h2>
+          `<h2>Investor Details</h2>
            <table><tbody>
-             <tr><th>Name</th><td>${targetClient?.name || 'Client User'}</td></tr>
-             <tr><th>Client ID</th><td>${targetId}</td></tr>
-             <tr><th>Email</th><td>${targetClient?.email || '—'}</td></tr>
-             <tr><th>Phone</th><td>${targetClient?.phone || '—'}</td></tr>
-             <tr><th>PAN</th><td>${targetClient?.pan || '—'}</td></tr>
+             <tr><th>Name</th><td>${targetInvestor?.name || 'Investor User'}</td></tr>
+             <tr><th>Investor ID</th><td>${targetId}</td></tr>
+             <tr><th>Email</th><td>${targetInvestor?.email || '—'}</td></tr>
+             <tr><th>Phone</th><td>${targetInvestor?.phone || '—'}</td></tr>
+             <tr><th>PAN</th><td>${targetInvestor?.pan || '—'}</td></tr>
            </tbody></table>
           <h2>Portfolio Summary</h2>
           <table>
@@ -136,7 +136,7 @@ export default function ClientReports() {
             ['Date', 'Type', 'Scheme', 'Amount (₹)', 'Units', 'NAV'],
             mockTransactions.map(t => [t[0], t[1], t[2], fmtINR(t[3]||0), t[4] ?? '-', t[5] ?? '-'])
           )
-        printHTML(`Portfolio Report — ${targetClient?.name || 'Client'}`, html)
+        printHTML(`Portfolio Report — ${targetInvestor?.name || 'Investor'}`, html)
       }
     } finally {
       setBusy(b => ({ ...b, pdf: false }))
@@ -147,11 +147,11 @@ export default function ClientReports() {
     if (!targetId) return
     setBusy(b => ({ ...b, xlsx: true }))
     try {
-      const fname = `Portfolio_${(targetClient?.name || 'report').replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}`
+      const fname = `Portfolio_${(targetInvestor?.name || 'report').replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}`
       const ok = await tryServerDownload(`/reports/portfolio/${targetId}.xlsx`, fname + '.xlsx', 'xlsx')
       if (!ok) {
         downloadExcel(
-          ['Client: ' + (targetClient?.name || 'Client') + ' — Generated: ' + new Date().toLocaleString('en-IN')],
+          ['Investor: ' + (targetInvestor?.name || 'Investor') + ' — Generated: ' + new Date().toLocaleString('en-IN')],
           [],
           fname
         )
@@ -179,23 +179,23 @@ export default function ClientReports() {
     <div className="page">
       <div className="page-title">
         <div>
-          <h1>Client Reports</h1>
+          <h1>Investor Reports</h1>
           <p className="text-muted mb-0" style={{ marginTop: 4 }}>
             Generate and download detailed portfolio reports in PDF or Excel format
           </p>
         </div>
       </div>
 
-      {!isClient && (
+      {!isInvestor && (
         <div className="card mb-2">
           <div className="form-group" style={{ maxWidth: 420, margin: 0 }}>
-            <label><FontAwesomeIcon icon={faChevronDown} style={{ marginRight: 6 }} />Select a Client First</label>
-            <select value={selectedClient} onChange={(e) => setSelectedClient(e.target.value)}>
+            <label><FontAwesomeIcon icon={faChevronDown} style={{ marginRight: 6 }} />Select a Investor First</label>
+            <select value={selectedInvestor} onChange={(e) => setSelectedInvestor(e.target.value)}>
               <option value="">— Choose a client —</option>
               {clients.map(c => <option key={c.id} value={c.id}>{c.name} — {c.id}</option>)}
             </select>
           </div>
-          {!selectedClient && (
+          {!selectedInvestor && (
             <div style={{ marginTop: '1rem', padding: '1rem', background: '#f0f7ff', borderRadius: 10, color: '#1e3a8a', fontSize: '0.9rem', borderLeft: '3px solid #1e3a8a' }}>
               <FontAwesomeIcon icon={faCircleCheck} style={{ marginRight: 6 }} />
               Select a client above to view their report options and summary preview.
@@ -204,7 +204,7 @@ export default function ClientReports() {
         </div>
       )}
 
-      {(isClient || selectedClient) && (
+      {(isInvestor || selectedInvestor) && (
         <>
           <div className="report-tiles mb-2">
             <div className="report-tile pdf" style={{ cursor: busy.pdf ? 'wait' : 'pointer' }} onClick={!busy.pdf ? downloadPDFReport : undefined}>
